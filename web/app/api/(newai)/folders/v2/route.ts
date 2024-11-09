@@ -14,14 +14,17 @@ export async function POST(request: NextRequest) {
     const response = await generateObject({
       model,
       schema: z.object({
-        suggestedFolders: z.array(z.object({
-          score: z.number().min(0).max(100),
-          isNewFolder: z.boolean(),
-          folder: z.string(),
-          reason: z.string(),
-        })).min(3)
+        suggestedFolders: z
+          .array(
+            z.object({
+              score: z.number().min(0).max(100),
+              isNewFolder: z.boolean(),
+              folder: z.string(),
+              reason: z.string(),
+            })
+          )
       }),
-      system: `Given the content and (if useful) the file name: "${fileName}", suggest relevant folders from the following list: ${folders.join(
+      system: `Given the content and (if useful) the file name: "${fileName}", suggest at least 3 folders you can use the following list: ${folders.join(
         ", if none of the folders are relevant, suggest new folders"
       )}, ${
         customInstructions
@@ -34,8 +37,11 @@ export async function POST(request: NextRequest) {
     const tokens = response.usage.totalTokens;
     console.log("incrementing token usage folders", userId, tokens);
     await incrementAndLogTokenUsage(userId, tokens);
+
     return NextResponse.json({
-      folders: response.object.suggestedFolders.sort((a, b) => b.score - a.score),
+      folders: response.object.suggestedFolders.sort(
+        (a, b) => b.score - a.score
+      ),
     });
   } catch (error) {
     if (error) {

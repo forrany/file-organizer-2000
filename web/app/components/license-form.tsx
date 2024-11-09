@@ -56,10 +56,10 @@ const LicenseForm = () => {
 
   return (
     // center elements
-    <div className="mt-8 flex flex-col items-center justify-center">
+    <div className="mt-8 flex flex-col ">
       {isPaid ? (
         <>
-          <Card className="w-[350px] ">
+          <Card className="w-[350px] bg-transparent">
             <CardHeader></CardHeader>
             <form action={onCreate} onSubmit={handleSubmit}>
               <CardFooter className="flex justify-center">
@@ -93,9 +93,6 @@ const LicenseForm = () => {
         </>
       ) : (
         <div className="text-center">
-          <h1 className="text-gray-800 text-5xl font-extrabold dark:text-gray-500">
-            Become a Pro user
-          </h1>
           <div className="mt-6">
             <CheckoutButton />
           </div>

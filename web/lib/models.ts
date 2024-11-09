@@ -12,6 +12,7 @@ const models = {
   "gpt-4o-mini": openai("gpt-4o-mini"),
   "grok-beta": openai("grok-beta"),
   "claude-3-5-sonnet-20240620": anthropic("claude-3-5-sonnet-20240620"),
+  "claude-3-5-sonnet-20241022": anthropic("claude-3-5-sonnet-20241022"),
 };
 
 export const getModel = (name: string) => {
@@ -21,5 +22,6 @@ export const getModel = (name: string) => {
     return models["gpt-4o"];
   }
   console.log(`Using model ${name}`);
+
   return models[name];
 };

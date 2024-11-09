@@ -1,5 +1,5 @@
 import * as React from "react";
-import { TFile, WorkspaceLeaf } from "obsidian";
+import { TFile, WorkspaceLeaf, Notice } from "obsidian";
 import FileOrganizer, { validMediaExtensions } from "../../index";
 import { debounce } from "lodash";
 
@@ -14,6 +14,7 @@ import { TranscriptionButton } from "./transcript";
 import { SimilarFilesBox } from "./files";
 import { EmptyState } from "./components/empty-state";
 import { logMessage } from "../../../utils";
+import { LicenseValidator } from "./components/license-validator";
 
 interface AssistantViewProps {
   plugin: FileOrganizer;
@@ -33,18 +34,21 @@ export const AssistantView: React.FC<AssistantViewProps> = ({
   const [noteContent, setNoteContent] = React.useState<string>("");
   const [refreshKey, setRefreshKey] = React.useState<number>(0);
   const [error, setError] = React.useState<string | null>(null);
+  const [isLicenseValid, setIsLicenseValid] = React.useState(false);
+
   const isMediaFile = React.useMemo(
     () => checkIfIsMediaFile(activeFile),
     [activeFile]
   );
+
   const isInIgnoredPatterns = React.useMemo(
-    // check if tis is part of an ignored folder
     () =>
       plugin
         .getAllIgnoredFolders()
         .some(folder => activeFile?.path.startsWith(folder)),
     [activeFile, plugin.getAllIgnoredFolders]
   );
+
   const updateActiveFile = React.useCallback(async () => {
     logMessage("updating active file");
     // Check if the Assistant view is visible before processing
@@ -107,6 +111,28 @@ export const AssistantView: React.FC<AssistantViewProps> = ({
     []
   );
 
+  const handleDelete = React.useCallback(async () => {
+    if (!activeFile) return;
+    
+    try {
+      await plugin.app.vault.delete(activeFile);
+      new Notice("File deleted successfully");
+    } catch (err) {
+      console.error("Error deleting file:", err);
+      setError("Failed to delete file");
+    }
+  }, [activeFile, plugin.app.vault]);
+
+  if (!isLicenseValid) {
+    return (
+      <LicenseValidator
+        apiKey={plugin.settings.API_KEY}
+        onValidationComplete={() => setIsLicenseValid(true)}
+        plugin={plugin}
+      />
+    );
+  }
+
   if (error) {
     return (
       <EmptyState
@@ -137,6 +163,8 @@ export const AssistantView: React.FC<AssistantViewProps> = ({
         message="This file is empty. Add some content and click refresh to see AI suggestions."
         showRefresh={true}
         onRefresh={refreshContext}
+        showDelete={true}
+        onDelete={handleDelete}
       />
     );
   }
