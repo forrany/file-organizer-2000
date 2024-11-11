@@ -36,13 +36,10 @@ export const GeneralTab: React.FC<GeneralTabProps> = ({ plugin }) => {
       setUsageData(data);
     } catch (error) {
       console.error('Error fetching usage data:', error);
-      new Notice('Failed to fetch usage data');
     } finally {
       setLoading(false);
     }
   };
-  // log usage data
-  console.log(usageData, 'usage');
 
   const handleLicenseKeyChange = async (value: string) => {
     setLicenseKey(value);

@@ -355,9 +355,7 @@ export default class FileOrganizer extends Plugin {
     if (this.settings.useSimilarTags) {
       await this.generateAndAppendSimilarTags(file, content, newName);
     }
-    // if (this.settings.enableAliasGeneration) {
-    //   await this.generateAndAppendAliases(file, newName, content);
-    // }
+
   }
 
   private async createMediaContainer(content: string): Promise<TFile> {
@@ -1104,31 +1102,32 @@ export default class FileOrganizer extends Plugin {
       this.settings.backupFolderPath,
       this.settings.templatePaths,
       this.settings.fabricPaths,
+      this.settings.pathToWatch,
+      '_FileOrganizer2000',
+      '/'
     ];
     logMessage("ignoredFolders", ignoredFolders);
     // remove empty strings
     return ignoredFolders.filter(folder => folder !== "");
   }
+  // this is a list of all the folders that file organizer to use for organization
+  getAllUserFolders(): string[] {
+    const allFolders = this.app.vault.getAllFolders();
+    const allFoldersPaths = allFolders.map(folder => folder.path);
+    const ignoredFolders = this.getAllIgnoredFolders();
 
-  getAllNonFo2kFolders(): string[] {
-    const allFolders = getAllFolders(this.app);
-
-    // if ignoreFolders includes * then return all folders
+    // If ignoreFolders includes "*", return empty array as all folders are ignored
     if (this.settings.ignoreFolders.includes("*")) {
       return [];
     }
 
-    return (
-      allFolders
-        // filter anything below fo2k
-        .filter(folder => !folder.includes("_FileOrganizer2000"))
-        .filter(folder => !this.settings.ignoreFolders.includes(folder))
-        .filter(folder => folder !== this.settings.defaultDestinationPath)
-        .filter(folder => folder !== this.settings.attachmentsPath)
-        .filter(folder => folder !== this.settings.backupFolderPath)
-        .filter(folder => folder !== this.settings.templatePaths)
-        .filter(folder => folder !== this.settings.fabricPaths)
-    );
+    return allFoldersPaths.filter(folder => {
+      // Check if the folder is not in the ignored folders list
+      return !ignoredFolders.includes(folder) && 
+             !ignoredFolders.some(ignoredFolder => 
+               folder.startsWith(ignoredFolder + "/")
+             );
+    });
   }
 
   async getSimilarFiles(fileToCheck: TFile): Promise<string[]> {
@@ -1312,13 +1311,16 @@ export default class FileOrganizer extends Plugin {
 
   async extractTextFromImage(image: ArrayBuffer): Promise<string> {
     const base64Image = this.arrayBufferToBase64(image);
-
+  
     const response = await makeApiRequest(() =>
       requestUrl({
         url: `${this.getServerUrl()}/api/vision`,
         method: "POST",
         contentType: "application/json",
-        body: JSON.stringify({ image: base64Image }),
+        body: JSON.stringify({ 
+          image: base64Image,
+          instructions: this.settings.imageInstructions 
+        }),
         throw: false,
         headers: {
           Authorization: `Bearer ${this.settings.API_KEY}`,
@@ -1423,11 +1425,9 @@ export default class FileOrganizer extends Plugin {
     content: string,
     filePath: string
   ): Promise<FolderSuggestion[]> {
-    const customInstructions = this.settings.enableCustomFolderInstructions
-      ? this.settings.customFolderInstructions
-      : undefined;
+    const customInstructions = this.settings.customFolderInstructions;
 
-    const folders = this.getAllNonFo2kFolders();
+    const folders = this.getAllUserFolders();
     const response = await fetch(`${this.getServerUrl()}/api/folders/v2`, {
       method: "POST",
       headers: {
@@ -1615,7 +1615,7 @@ export default class FileOrganizer extends Plugin {
     }
     const currentFolder =
       this.app.vault.getAbstractFileByPath(filePath)?.parent?.path || "";
-    const filteredFolders = this.getAllNonFo2kFolders()
+    const filteredFolders = this.getAllUserFolders()
       .filter(folder => folder !== currentFolder)
 
       // if  this.settings.ignoreFolders has one or more folder specified, filter them out including subfolders
@@ -1660,7 +1660,7 @@ export default class FileOrganizer extends Plugin {
     }
   }
   async getNewFolders(content: string, filePath: string): Promise<string[]> {
-    const uniqueFolders = await this.getAllNonFo2kFolders();
+    const uniqueFolders = await this.getAllUserFolders();
     if (this.settings.ignoreFolders.includes("*")) {
       return [this.settings.defaultDestinationPath];
     }
