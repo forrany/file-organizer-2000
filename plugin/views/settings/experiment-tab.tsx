@@ -11,6 +11,9 @@ export const ExperimentTab: React.FC<ExperimentTabProps> = ({ plugin }) => {
   const [enableAtomicNotes, setEnableAtomicNotes] = useState(plugin.settings.enableAtomicNotes);
   const [enableScreenpipe, setEnableScreenpipe] = useState(plugin.settings.enableScreenpipe);
   const [enableFabric, setEnableFabric] = useState(plugin.settings.enableFabric);
+  const [useInbox, setUseInbox] = useState(plugin.settings.useInbox);
+  const [showLocalLLMInChat, setShowLocalLLMInChat] = useState(plugin.settings.showLocalLLMInChat);
+  const [enableTitleSuggestions, setEnableTitleSuggestions] = useState(plugin.settings.enableTitleSuggestions);
 
   const handleToggleChange = async (value: boolean, setter: React.Dispatch<React.SetStateAction<boolean>>, settingKey: keyof typeof plugin.settings) => {
     setter(value);
@@ -53,6 +56,62 @@ export const ExperimentTab: React.FC<ExperimentTabProps> = ({ plugin }) => {
               value={enableAtomicNotes}
               onChange={(value) => handleToggleChange(value, setEnableAtomicNotes, 'enableAtomicNotes')}
             />
+            <ToggleSetting
+              name="Batch Inbox Processing (Beta)"
+              description={
+                <div className="space-y-2">
+                  <p>Enable the new inbox system designed for processing large volumes of files efficiently.</p>
+                  <div className="mt-2 p-3 bg-[--background-secondary] rounded text-sm space-y-1">
+                    <p className="text-[--text-accent]">✨ New Features:</p>
+                    <ul className="list-disc pl-4 text-[--text-muted]">
+                      <li>Real-time processing status in sidebar</li>
+                      <li>Improved batch file handling</li>
+                      <li>Progress logging and monitoring</li>
+                    </ul>
+                    <p className="text-[--text-warning] mt-2">Note: Currently does not support classifications and tagging</p>
+                  </div>
+                </div>
+              }
+              value={useInbox}
+              onChange={(value) => handleToggleChange(value, setUseInbox, 'useInbox')}
+            />
+            <ToggleSetting
+              name="Local LLM Integration"
+              description={
+                <div className="space-y-2">
+                  <p>Enable local LLM options in the chat interface for offline AI processing.</p>
+                  <div className="mt-2 p-3 bg-[--background-secondary] rounded text-sm space-y-2">
+                    <p className="text-[--text-warning]">⚡ Requires a compatible local LLM setup</p>
+                    <p className="text-[--text-muted]">Currently supports:</p>
+                    <ul className="list-disc pl-4 text-[--text-muted]">
+                      <li>Llama 3.2</li>
+                      <li>Ollama</li>
+                    </ul>
+                    <p className="text-xs text-[--text-faint]">More models coming soon</p>
+                  </div>
+                </div>
+              }
+              value={showLocalLLMInChat}
+              onChange={(value) => handleToggleChange(value, setShowLocalLLMInChat, 'showLocalLLMInChat')}
+            />
+            <ToggleSetting
+              name="Title Suggestions (Deprecated)"
+              description={
+                <div className="space-y-2">
+                  <p>Show title suggestions in the sidebar.</p>
+                  <div className="mt-2 p-3 bg-[--background-secondary] rounded text-sm space-y-1">
+                    <p className="text-[--text-warning]">⚠️ Deprecated Feature</p>
+                    <p className="text-[--text-muted]">This feature will be removed in a future update. For file renaming:</p>
+                    <ul className="list-disc pl-4 text-[--text-muted]">
+                      <li>Use the rename instructions in Organization preferences</li>
+                      <li>Configure file renaming behavior for inbox processing</li>
+                    </ul>
+                  </div>
+                </div>
+              }
+              value={enableTitleSuggestions}
+              onChange={(value) => handleToggleChange(value, setEnableTitleSuggestions, 'enableTitleSuggestions')}
+            />
           </div>
         </div>
 
@@ -94,7 +153,7 @@ export const ExperimentTab: React.FC<ExperimentTabProps> = ({ plugin }) => {
 
 interface ToggleSettingProps {
   name: string;
-  description: string;
+  description: string | JSX.Element;
   value: boolean;
   onChange: (value: boolean) => void;
 }
@@ -103,14 +162,16 @@ const ToggleSetting: React.FC<ToggleSettingProps> = ({ name, description, value,
   <div className="setting-item flex items-center justify-between p-4 bg-[--background-primary] rounded-lg border border-[--background-modifier-border] hover:border-[--background-modifier-border-hover]">
     <div className="setting-item-info flex-1">
       <div className="setting-item-name font-medium text-[--text-normal]">{name}</div>
-      <div className="setting-item-description text-sm text-[--text-muted]">{description}</div>
+      <div className="setting-item-description text-sm text-[--text-muted]">
+        {description}
+      </div>
     </div>
     <div className="setting-item-control">
       <input
         type="checkbox"
         checked={value}
         onChange={(e) => onChange(e.target.checked)}
-        className="form-checkbox h-5 w-5 text-[--interactive-accent] rounded border-[--background-modifier-border]"
+        className="text-[--interactive-accent] rounded border-[--background-modifier-border]"
       />
     </div>
   </div>

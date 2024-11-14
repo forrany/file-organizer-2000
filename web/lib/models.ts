@@ -13,6 +13,7 @@ const models = {
   "grok-beta": openai("grok-beta"),
   "claude-3-5-sonnet-20240620": anthropic("claude-3-5-sonnet-20240620"),
   "claude-3-5-sonnet-20241022": anthropic("claude-3-5-sonnet-20241022"),
+  "claude-3-5-haiku-20241022": anthropic("claude-3-5-haiku-20241022"),
 };
 
 export const getModel = (name: string) => {
@@ -25,3 +26,4 @@ export const getModel = (name: string) => {
 
   return models[name];
 };
+

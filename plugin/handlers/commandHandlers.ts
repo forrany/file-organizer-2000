@@ -1,26 +1,8 @@
 import { WorkspaceLeaf } from "obsidian";
 import FileOrganizer from "../index";
-import { ORGANIZER_VIEW_TYPE, AssistantViewWrapper } from "../views/organizer";
-import { AIChatView, CHAT_VIEW_TYPE } from "../views/ai-chat/view";
+import { ORGANIZER_VIEW_TYPE, AssistantViewWrapper } from "../views/organizer/view";
 
-export function initializeChat(plugin: FileOrganizer) {
-  plugin.registerView(
-    CHAT_VIEW_TYPE,
-    (leaf: WorkspaceLeaf) => new AIChatView(leaf, plugin)
-  );
 
-  plugin.addRibbonIcon("bot", "Fo2k Chat", () => {
-    plugin.showAIChatView();
-  });
-
-  plugin.addCommand({
-    id: "show-ai-chat",
-    name: "Show AI Chat",
-    callback: async () => {
-      await plugin.showAIChatView();
-    },
-  });
-}
 
 export function initializeOrganizer(plugin: FileOrganizer) {
 
@@ -50,8 +32,9 @@ export function initializeFileOrganizationCommands(plugin: FileOrganizer) {
     name: "Put in inbox",
     callback: async () => {
       const activeFile = plugin.app.workspace.getActiveFile();
+      // move to file to inbox
       if (activeFile) {
-        await plugin.processFileV2(activeFile);
+        await plugin.app.vault.rename(activeFile, `${plugin.settings.pathToWatch}/${activeFile.name}`);
       }
     },
   });

@@ -1,6 +1,7 @@
 import * as React from "react";
 import { TFile } from "obsidian";
 import FileOrganizer from "../../index";
+import { logger } from "../../services/logger";
 
 interface SimilarFilesBoxProps {
   plugin: FileOrganizer;
@@ -15,10 +16,10 @@ export const SimilarFilesBox: React.FC<SimilarFilesBoxProps> = ({ plugin, file }
     if (!file) return;
     setLoading(true);
     try {
-      const similarFiles = await plugin.getSimilarFiles(file);
+      const similarFiles = await plugin._experimentalGenerateSimilarFiles(file);
       setFilePaths(similarFiles);
     } catch (error) {
-      console.error("Error fetching similar files:", error);
+      logger.error("Error fetching similar files:", error);
     } finally {
       setLoading(false);
     }

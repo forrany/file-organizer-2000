@@ -1,10 +1,11 @@
 import * as React from "react";
 import { TFile } from "obsidian";
 import FileOrganizer from "../../index";
-import { sanitizeTag } from "../../../utils";
+import { sanitizeTag } from "../../someUtils";
 import { SkeletonLoader } from "./components/skeleton-loader";
 import { motion, AnimatePresence } from "framer-motion";
 import { ExistingFolderButton, NewFolderButton } from "./components/suggestion-buttons";
+import { logger } from "../../services/logger";
 
 // Rename the button components for tags
 const ExistingTagButton = ExistingFolderButton;
@@ -41,7 +42,7 @@ export const SimilarTags: React.FC<SimilarTagsProps> = ({
 
       try {
         const vaultTags = await plugin.getAllVaultTags();
-        const suggestedTags = await plugin.guessRelevantTags(
+        const suggestedTags = await plugin.recommendTags(
           content,
           file.basename,
           vaultTags
@@ -57,7 +58,7 @@ export const SimilarTags: React.FC<SimilarTagsProps> = ({
         setExistingTags(existingTagsResult || []);
         setNewTags(newTagsResult || []);
       } catch (error) {
-        console.error("Error in tag fetching process:", error);
+        logger.error("Error in tag fetching process:", error);
       } finally {
         setLoading(false);
         setInitialLoadComplete(true);

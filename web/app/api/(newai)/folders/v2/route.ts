@@ -8,7 +8,7 @@ import { generateObject } from "ai";
 export async function POST(request: NextRequest) {
   try {
     const { userId } = await handleAuthorization(request);
-    const { content, fileName, folders, customInstructions } =
+    const { content, fileName, folders, customInstructions, count = 3 } =
       await request.json();
     const model = getModel(process.env.MODEL_NAME);
     const response = await generateObject({
@@ -23,15 +23,15 @@ export async function POST(request: NextRequest) {
               reason: z.string(),
             })
           )
+          .min(1)
+          .max(count)
       }),
-      system: `Given the content and (if useful) the file name: "${fileName}", suggest at least 3 folders you can use the following list: ${folders.join(
-        ", if none of the folders are relevant, suggest new folders"
-      )}, ${
-        customInstructions
-          ? `with the following custom instructions: "${customInstructions}"`
-          : ""
+      system: `Given the content and file name: "${fileName}", suggest exactly ${count} folders. You can use: ${folders.join(
+        ", "
+      )}. If none are relevant, suggest new folders. ${
+        customInstructions ? `Instructions: "${customInstructions}"` : ""
       }`,
-      prompt: `Given the content: "${content}"`,
+      prompt: `Content: "${content}"`,
     });
     // increment tokenUsage
     const tokens = response.usage.totalTokens;

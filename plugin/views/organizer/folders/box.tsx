@@ -4,8 +4,9 @@ import FileOrganizer from "../../../index";
 import { motion, AnimatePresence } from "framer-motion";
 import { SkeletonLoader } from "../components/skeleton-loader";
 import { FolderSuggestion } from "../../../index";
-import { logMessage } from "../../../../utils";
+import { logMessage } from "../../../someUtils";
 import { ExistingFolderButton, NewFolderButton } from "../components/suggestion-buttons";
+import { logger } from "../../../services/logger";
 
 interface SimilarFolderBoxProps {
   plugin: FileOrganizer;
@@ -30,12 +31,14 @@ export const SimilarFolderBox: React.FC<SimilarFolderBoxProps> = ({
     setSuggestions([]);
     setLoading(true);
     setError(null);
-
+    // cut content length to only first 50k/4 chars 
+    const truncatedContent = content.slice(0, 50000);
     try {
-      const folderSuggestions = await plugin.guessRelevantFolders(
-        content,
+      const folderSuggestions = await plugin.recommendFolders(
+        truncatedContent,
         file.path
       );
+
 
       // Get all valid folders
       const validFolders = plugin.getAllUserFolders();
@@ -48,7 +51,7 @@ export const SimilarFolderBox: React.FC<SimilarFolderBoxProps> = ({
 
       setSuggestions(filteredSuggestions);
     } catch (err) {
-      console.error("Error fetching folders:", err);
+      logger.error("Error fetching folders:", err);
       const errorMessage =
         typeof err === "object" && err !== null
           ? err.error?.message || err.error || err.message || "Unknown error"
@@ -80,7 +83,7 @@ export const SimilarFolderBox: React.FC<SimilarFolderBoxProps> = ({
       await plugin.moveFile(file, file.basename, folder);
       new Notice(`Moved ${file.basename} to ${folder}`);
     } catch (error) {
-      console.error("Error moving file:", error);
+      logger.error("Error moving file:", error);
       const errorMessage =
         error instanceof Error ? error.message : "Unknown error occurred";
       new Notice(
