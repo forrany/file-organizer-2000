@@ -2,18 +2,19 @@ import { PreSRMConfig } from "@u22n/srm/dist";
 
 const features = {
   support: "Support",
-  freeTrial: "3-day Free trial",
+  freeTrial: "7-day Free trial",
   noExternalAI: "No external AI subscription needed",
   easySetup: "Seamless no-sweat setup",
   fileLimit: "~1000 files per month",
-  audioTranscription: "120 min audio transcription p/m",
+  audioTranscription: "300 min audio transcription p/m",
   moneyBackGuarantee: "30 days money-back guarantee",
   premiumSupport: "Premium support",
   privacy: "Privacy-focused",
   guidedSetup: "Quick guided setup",
   payAsYouGo: "Pay-as-you-go with your own OpenAI key",
+  earlyAccess: "Early access to new features",
+  onboardingCall: "Onboarding call with a founder",
 };
-
 
 // Simplified environment-based target URL configuration
 const getTargetUrl = () => {
@@ -22,7 +23,7 @@ const getTargetUrl = () => {
   }
 
   if (process.env.VERCEL_ENV === "preview") {
-    return process.env.VERCEL_BRANCH_URL;
+    return "file-organizer-2000-git-billing-test-prologe.vercel.app";
   }
 
   return "localhost:3000";
@@ -30,7 +31,6 @@ const getTargetUrl = () => {
 
 const targetUrl = getTargetUrl();
 const webhookEndpoint = `https://${targetUrl}/api/webhook`;
-
 
 export const config = {
   features: features,
@@ -64,8 +64,7 @@ export const config = {
           amount: 9900, // Adjust this to match your current price
           interval: "year",
           type: "recurring",
-          trialPeriodDays: 3, // Add trial period for annual plan
-
+          trialPeriodDays: 7, // Add trial period for annual plan
         },
       },
       features: [
@@ -74,7 +73,8 @@ export const config = {
         features.easySetup,
         features.fileLimit,
         features.audioTranscription,
-        features.support,
+        features.earlyAccess,
+        features.premiumSupport,
         features.moneyBackGuarantee,
       ],
     },
@@ -94,6 +94,7 @@ export const config = {
         features.payAsYouGo,
         features.guidedSetup,
         features.audioTranscription,
+        features.onboardingCall,
         features.premiumSupport,
         features.moneyBackGuarantee,
       ],

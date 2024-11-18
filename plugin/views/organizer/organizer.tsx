@@ -37,6 +37,7 @@ export const AssistantView: React.FC<AssistantViewProps> = ({
   const [refreshKey, setRefreshKey] = React.useState<number>(0);
   const [error, setError] = React.useState<string | null>(null);
   const [isLicenseValid, setIsLicenseValid] = React.useState(false);
+  const [isConnected, setIsConnected] = React.useState(false);
 
   const isMediaFile = React.useMemo(
     () => checkIfIsMediaFile(activeFile),
@@ -125,6 +126,9 @@ export const AssistantView: React.FC<AssistantViewProps> = ({
     }
   }, [activeFile, plugin.app.vault]);
 
+
+
+  // Then check license
   if (!isLicenseValid) {
     return (
       <LicenseValidator
