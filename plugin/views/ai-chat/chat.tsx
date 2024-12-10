@@ -74,7 +74,7 @@ export const ChatComponent: React.FC<ChatComponentProps> = ({
   logger.debug("contextString", contextString);
 
   const chatBody = {
-    currentDatetime: moment().format("YYYY-MM-DDTHH:mm:ssZ"),
+    currentDatetime: window.moment().format("YYYY-MM-DDTHH:mm:ssZ"),
     enableScreenpipe: plugin.settings.enableScreenpipe,
     newUnifiedContext: contextString,
   };
@@ -229,7 +229,7 @@ export const ChatComponent: React.FC<ChatComponentProps> = ({
         >
           <div className="flex-grow overflow-y-auto relative" ref={inputRef}>
             <Tiptap
-              value={input}
+            value={input}
               onChange={handleTiptapChange}
               onKeyDown={handleKeyDown}
             />

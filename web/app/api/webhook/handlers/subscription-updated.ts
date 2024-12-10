@@ -1,11 +1,12 @@
-import { WebhookEvent, WebhookHandlerResponse, CustomerData } from '../types';
+import { createWebhookHandler } from '../handler-factory';
+import { CustomerData } from '../types';
 import { updateClerkMetadata } from '@/lib/services/clerk';
 import { updateUserSubscriptionData } from '../utils';
 import Stripe from 'stripe';
 import { trackLoopsEvent } from '@/lib/services/loops';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string, {
-  apiVersion: '2022-11-15',
+  apiVersion: '2024-06-20',
 });
 
 const getStripeProduct = async (productId: string) => {
@@ -27,36 +28,29 @@ function getBillingCycle(subscription: Stripe.Subscription): "monthly" | "yearly
   return interval === 'year' ? 'yearly' : 'monthly';
 }
 
-export async function handleSubscriptionUpdated(event: WebhookEvent): Promise<WebhookHandlerResponse> {
-  const subscription = event.data.object as Stripe.Subscription;
-  const userId = subscription.metadata?.userId;
+export const handleSubscriptionUpdated = createWebhookHandler(
+  async (event) => {
+    const subscription = event.data.object as Stripe.Subscription;
+    const userId = subscription.metadata?.userId;
 
-  if (!userId) {
-    return {
-      success: false,
-      message: 'No userId found in subscription metadata',
+    const customerData: CustomerData = {
+      userId,
+      customerId: subscription.customer as string,
+      status: subscription.status,
+      paymentStatus: subscription.status,
+      billingCycle: getBillingCycle(subscription),
+      product: await getSubscriptionProduct(subscription),
+      plan: getSubscriptionPrice(subscription),
+      lastPayment: new Date(),
     };
-  }
 
-  const customerData: CustomerData = {
-    userId,
-    customerId: subscription.customer as string,
-    status: subscription.status,
-    paymentStatus: subscription.status,
-    billingCycle: getBillingCycle(subscription),
-    product: await getSubscriptionProduct(subscription),
-    plan: getSubscriptionPrice(subscription),
-    lastPayment: new Date(),
-  };
-
-  try {
     await updateUserSubscriptionData(customerData);
     await updateClerkMetadata(customerData);
 
-    // Get customer email from Stripe
-    const customer = await stripe.customers.retrieve(subscription.customer as string) as Stripe.Customer;
+    const customer = await stripe.customers.retrieve(
+      subscription.customer as string
+    ) as Stripe.Customer;
     
-    // Add Loops tracking
     await trackLoopsEvent({
       email: typeof customer === 'string' ? '' : customer.email || '',
       userId: customerData.userId,
@@ -73,11 +67,8 @@ export async function handleSubscriptionUpdated(event: WebhookEvent): Promise<We
       success: true,
       message: `Successfully processed subscription update for ${userId}`,
     };
-  } catch (error) {
-    return {
-      success: false,
-      message: 'Failed to process subscription update',
-      error,
-    };
+  },
+  {
+    requiredMetadata: ['userId'],
   }
-} 
+); 

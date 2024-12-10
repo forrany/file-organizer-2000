@@ -1,6 +1,7 @@
 This works like this
 
-./web - nextjs app router 
+./web - nextjs app router includes everything to related to user accounts 
+./web/app/api/(new-ai) containts all the ai related functions
 ./plugin - obsidian plugin 
 
 
@@ -9,6 +10,13 @@ in the ./plugin use this values inside of tailwind classes like so
 
 example:
 text[--text-error]
+
+
+- three plans
+  - self-hosted (no license key)
+  - lifetime (license key that also acts as api key with selfhostingurl)
+  - subscription (license key that also acts as api key)
+
 
 
 here's the list of variables you can use:
@@ -148,6 +156,7 @@ export async function POST(req: Request) {
 import { ToolInvocation } from 'ai';
 import { Message, useChat } from 'ai/react';
 import { pipeline } from 'stream'
+import { PlaySquareIcon } from 'lucide-react'
 
 export default function Chat() {
   const {
