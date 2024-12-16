@@ -1,5 +1,5 @@
 "use server";
-import { auth, clerkClient } from "@clerk/nextjs/server";
+import { auth,  } from "@clerk/nextjs/server";
 import { Unkey } from "@unkey/api";
 import { db, UserUsageTable as UserUsageTableImport } from "@/drizzle/schema";
 import { eq } from "drizzle-orm";

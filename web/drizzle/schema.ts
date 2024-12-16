@@ -38,6 +38,25 @@ export const UserUsageTable = pgTable(
   }
 );
 
+export const vercelTokens = pgTable('vercel_tokens', {
+  id: serial('id').primaryKey(),
+  userId: text('user_id').notNull(),
+  token: text('token').notNull(),
+  projectId: text('project_id'),
+  deploymentUrl: text("deployment_url"),
+  projectUrl: text("project_url"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+  lastDeployment: timestamp("last_deployment"),
+  modelProvider: text("model_provider").default('openai'),
+  modelName: text("model_name").default('gpt-4o'),
+  visionModelName: text("vision_model_name").default('gpt-4o'),
+  lastApiKeyUpdate: timestamp("last_api_key_update"),
+});
+
+export type VercelToken = typeof vercelTokens.$inferSelect;
+export type NewVercelToken = typeof vercelTokens.$inferInsert;
+
 export const createEmptyUserUsage = async (userId: string) => {
   await db.insert(UserUsageTable).values({
     userId,
