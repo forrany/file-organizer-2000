@@ -9,6 +9,8 @@ import {
   normalizePath,
   loadPdfJs,
   arrayBufferToBase64,
+  CachedMetadata,
+  LinkCache,
 } from "obsidian";
 import { logMessage, sanitizeTag } from "./someUtils";
 import { FileOrganizerSettingTab } from "./views/settings/view";
@@ -16,6 +18,7 @@ import {
   AssistantViewWrapper,
   ORGANIZER_VIEW_TYPE,
 } from "./views/assistant/view";
+import { DashboardView, DASHBOARD_VIEW_TYPE } from "./views/assistant/dashboard/view";
 import Jimp from "jimp/es/index";
 
 import { FileOrganizerSettings, DEFAULT_SETTINGS } from "./settings";
@@ -286,7 +289,6 @@ export default class FileOrganizer extends Plugin {
         formattedContent = partialContent;
         await this.app.vault.modify(file, formattedContent);
       };
-
       await this.formatStream(
         content,
         formattingInstruction,
@@ -300,6 +302,64 @@ export default class FileOrganizer extends Plugin {
     } catch (error) {
       logger.error("Error formatting content:", error);
       new Notice("An error occurred while formatting the content.", 6000);
+    }
+  }
+
+  async streamFormatInCurrentNoteLineByLine({
+    file,
+    formattingInstruction,
+    content,
+    chunkMode = "line",
+  }: {
+    file: TFile;
+    formattingInstruction: string;
+    content: string;
+    chunkMode?: "line" | "partial";
+  }): Promise<void> {
+    try {
+      new Notice("Formatting content line by line...", 3000);
+
+      // Backup the file before formatting
+      const backupFile = await this.backupTheFileAndAddReferenceToCurrentFile(
+        file
+      );
+
+      // Prepare streaming
+      let formattedContent = "";
+      let lastLineCount = 0;
+
+      const updateCallback = async (chunk: string) => {
+        if (chunkMode === "line") {
+          // Split chunk into lines and only append new lines
+          const lines = chunk.split("\n");
+          const newLines = lines.slice(lastLineCount);
+          if (newLines.length > 0) {
+            formattedContent = lines.join("\n");
+            lastLineCount = lines.length;
+            await this.app.vault.modify(file, formattedContent);
+          }
+        } else {
+          // For partial mode, just append the new chunk
+          formattedContent = chunk;
+          await this.app.vault.modify(file, formattedContent);
+        }
+      };
+
+      await this.formatStream(
+        content,
+        formattingInstruction,
+        this.getServerUrl(),
+        this.getApiKey(),
+        updateCallback
+      );
+
+      // Insert reference to backup
+      await this.appendBackupLinkToCurrentFile(file, backupFile);
+      new Notice("Line-by-line update done!", 3000);
+    } catch (error) {
+      logger.error("Error formatting content line by line:", error);
+      new Notice("An error occurred while formatting the content.", 6000);
+      throw error; // Re-throw to allow component to handle error state
     }
   }
 
@@ -330,6 +390,12 @@ export default class FileOrganizer extends Plugin {
   getApiKey(): string {
     return this.settings.API_KEY;
   }
+  async getCurrentFileLinks(file: TFile): Promise<LinkCache[]> {
+    // force metadata cache to be loaded
+    await this.app.vault.read(file);
+    const cache = this.app.metadataCache.getFileCache(file);
+    return cache?.links || [];
+  }
 
   async formatStream(
     content: string,
@@ -342,6 +408,7 @@ export default class FileOrganizer extends Plugin {
       content,
       formattingInstruction,
       enableFabric: this.settings.enableFabric,
+
     };
 
     const response = await fetch(`${serverUrl}/api/format-stream`, {
@@ -869,6 +936,21 @@ export default class FileOrganizer extends Plugin {
         }
       },
     });
+
+    // Register the dashboard view
+    this.registerView(
+      DASHBOARD_VIEW_TYPE,
+      (leaf) => new DashboardView(leaf, this)
+    );
+
+    // Add command to open dashboard
+    this.addCommand({
+      id: "open-fo2k-dashboard",
+      name: "Open Dashboard",
+      callback: () => {
+        this.activateDashboard();
+      },
+    });
   }
   async saveSettings() {
     await this.saveData(this.settings);
@@ -991,5 +1073,22 @@ export default class FileOrganizer extends Plugin {
 
     const { titles } = await response.json();
     return titles;
+  }
+
+  async activateDashboard(): Promise<DashboardView | null> {
+    const { workspace } = this.app;
+    
+    let leaf = workspace.getLeavesOfType(DASHBOARD_VIEW_TYPE)[0];
+    
+    if (!leaf) {
+      leaf = workspace.getRightLeaf(false);
+      await leaf.setViewState({
+        type: DASHBOARD_VIEW_TYPE,
+        active: true,
+      });
+    }
+    
+    workspace.revealLeaf(leaf);
+    return leaf.view as DashboardView;
   }
 }

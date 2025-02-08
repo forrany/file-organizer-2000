@@ -32,9 +32,10 @@ export class FileOrganizerSettings {
   enableFabric = false;
   useFolderEmbeddings = false;
   useVaultTitles = true;
+  enableSearchGrounding = false;
   showLocalLLMInChat = false;
   customFolderInstructions = "";
-  selectedModel: "gpt-4o" | "llama3.2" | "gemini-2.0-flash-exp" = "gpt-4o";
+  selectedModel: "gpt-4o" | "llama3.2" = "gpt-4o";
   customModelName = "llama3.2";
   tagScoreThreshold = 70;
   formatBehavior: "override" | "newFile" = "override";
@@ -54,6 +55,7 @@ export class FileOrganizerSettings {
   customTagInstructions =
     "Generate tags that capture the main topics, themes, and type of content in the document. Focus on specific, meaningful tags that will help with organization and retrieval.";
   hasCatalystAccess = null;
+  hasRunOnboarding = false;
 }
 
 export const DEFAULT_SETTINGS = new FileOrganizerSettings();

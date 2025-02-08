@@ -226,7 +226,6 @@ export const AssistantView: React.FC<AssistantViewProps> = ({
         "Error loading folder suggestions"
       )}
 
-
       {plugin.settings.enableAtomicNotes && (
         <>
           <SectionHeader text="Atomic notes" icon="✂️ " />

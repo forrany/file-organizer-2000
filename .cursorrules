@@ -1,21 +1,163 @@
+
+
 This works like this
 
-./web - nextjs app router includes everything to related to user accounts 
-./web/app/api/(new-ai) containts all the ai related functions
-./plugin - obsidian plugin 
+./packages/web - nextjs app router includes everything to related to user accounts 
+./packages/web/app/api/(new-ai) containts all the ai related functions
+./packages/plugin - obsidian plugin 
+./packages/plugin/index.ts - the main file for the plugin
+
+This project uses pnpm
 
 
 
-in the ./plugin use this values inside of tailwind classes like so
 
-example:
-text[--text-error]
+core way the app works:
+- inbox (a special folder in the vault, which is on the fs)
+- the inbox folder is processed by the plugin, which will move the files to the correct folder based on the classification
+-  there's an ai chat that has access to a whole lot of functioncals be used to chat with context of files and to do certain actions as defined in ./packages/web/app/api/(new-ai)/tools.ts
 
 
-- three plans
-  - self-hosted (no license key)
-  - lifetime (license key that also acts as api key with selfhostingurl)
-  - subscription (license key that also acts as api key)
+
+hyprqrl Logo
+Note Companion for Obsidian
+Your AI-powered assistant that turns scattered notes into actionable knowledge.
+
+Start 7-Day Free Trial
+Meet Your All-in-One Workflow Buddy
+Inbox
+Instantly organize any dragged-and-dropped file. Note Companion automatically detects relevant tags and suggests the best folder or location.
+
+Meetings
+Supercharge your meeting notes using ScreenPipe, which continuously records your conversation. Tap "Enhance Meeting Note" and watch as it merges the last few minutes of discussion with your current file for perfectly contextualized notes.
+
+Chat
+Chat directly with your notes and bring other documents or folders into the conversation with a simple @ mention. Ask Note Companion to modify text, add summaries, rename files, or even split your notes—all in real time.
+
+Why Note Companion?
+Automated Organization
+No more manual tagging or folder wrangling. Let AI do the heavy lifting.
+
+Instant Insight
+Seamlessly merge new discussions or files with existing notes, so everything stays updated and easy to find.
+
+Powerful Editing Tools
+Rename, split, or refine notes with a quick command.
+
+Deep Context
+AI suggestions factor in the content of your entire vault, ensuring you always get the most relevant tags and folders.
+
+See it in Action
+Experience how Note Companion transforms your workflow
+
+
+
+
+
+
+📝 team-sync-notes.md
+# Team Sync - Product Review
+## Meeting Details
+**Date**: March 15, 2024**Attendees**: John, Sarah, Mike, Lisa
+## Key Discussions
+1. **Mobile App Redesign Priority**
+- User engagement metrics show increasing mobile usage - Need to focus on improving mobile experience - Adopt mobile-first approach
+2. **User Feedback Analysis**
+- Navigation complexity issues identified - Performance concerns on older devices - Simplified navigation structure proposed
+## Action Items
+- [ ] Schedule follow-up with design team- [x] Share meeting notes with stakeholders- [ ] Update project timeline- [ ] Conduct detailed user feedback review
+## Next Steps
+1. Implement mobile-first approach2. Redesign navigation structure3. Plan performance optimization sprint
+## Related Notes
+[[Q4 Planning]][[Mobile App Redesign]][[User Feedback Q1 2024]]
+## Tags
+#product#mobile#q4-2024#user-feedback
+Organizer
+Inbox
+Meetings
+Chat
+🎯
+AI-Powered File Organization
+Your personal file librarian that understands context
+
+Turn messy notes into clean, structured docs
+Auto-tag everything based on content
+Split long docs into atomic notes
+🤖
+AI Templates
+Apply Template
+Current Template:
+Meeting Notes Pro
+This template will:
+
+Structure content with clear headings
+Extract and format action items
+Highlight key decisions
+Add metadata (date, attendees)
+🏷️
+AI Tags
+3 suggestions
+#mobile-app
+#user-feedback
+#q4-planning
+Tags suggested based on note content analysis
+
+📁
+Suggested Location
+Move
+Projects/Mobile App/Meetings
+Based on content similarity and existing structure
+
+✂️
+Atomic Notes
+4 chunks detected
+Suggested splits:
+Mobile App Redesign Requirements
+Q4 Timeline Updates
+User Feedback Analysis
+Performance Optimization Plan
+Split into Atomic Notes
+Simple, Flexible Pricing
+Whether you're a solo note-taker or a power user looking for advanced features, we've got you covered.
+
+Self-Hosted
+Free
+Ultimate privacy and control
+
+Ultimate privacy
+Use your own AI models
+Community support
+Source code access
+Get Started
+Subscription
+$15
+/month
+or $119/year (save ~33%)
+No setup required
+
+No setup required
+Managed API keys
+~1000 files per month
+Premium support
+Regular updates
+Start Free Trial
+Most Popular
+Pay Once
+$300
+Lifetime access with full control
+
+One-time payment
+Lifetime updates
+Multiple licenses
+Premium support
+Use your own API keys
+Get Lifetime Access
+Ready to revolutionize your note-taking?
+Get Note Companion and enjoy a 7-day free trial on any paid plan. Bring order to your Obsidian vault. Stop wrestling with messy notes and let AI handle the tedious tasks—so you can focus on what really matters.
+
+Start Free Trial
+Different AI Inc - Privacy-first AI solutions
+
 
 
 
@@ -31,9 +173,6 @@ here's the list of variables you can use:
     --background-modifier-border: var(--color-base-30);
     --background-modifier-border-hover: var(--color-base-35);
     --background-modifier-border-focus: var(--color-base-40);
-    --background-modifier-error-rgb: var(--color-red-rgb);
-    --background-modifier-error: var(--color-red);
-    --background-modifier-error-hover: var(--color-red);
     --background-modifier-success-rgb: var(--color-green-rgb);
     --background-modifier-success: var(--color-green);
     --background-modifier-message: rgba(0, 0, 0, 0.9);
@@ -43,7 +182,6 @@ here's the list of variables you can use:
     --text-faint: var(--color-base-50);
     --text-on-accent: white;
     --text-on-accent-inverted: black;
-    --text-error: var(--color-red);
     --text-warning: var(--color-orange);
     --text-success: var(--color-green);
     --text-selection: hsla(var(--color-accent-hsl), 0.2);
@@ -261,4 +399,157 @@ and one call to apply the recommendation. add tag after tagging , move file afte
 
 when you classify apply a tag to the document there's append tag funciton on plugin 
 only format if 1. there's a classification 2. there's no tag with the classification presetn
+
+
+
+# Tool Calling
+
+Tools are objects that can be invoked by the model to perform specific tasks. AI SDK Core tools consist of three key elements:
+
+1. **Description**: Optional. Describes the tool's purpose and influences when it is selected.
+2. **Parameters**: A Zod schema or JSON schema that defines the tool's parameters. Used to validate tool calls.
+3. **Execute**: An optional async function that processes tool calls and returns a result of type `RESULT`.
+
+## Defining Tools
+
+Use the `tool` helper function to define tools:
+
+```javascript
+import { z } from 'zod';
+import { generateText, tool } from 'ai';
+
+const result = await generateText({
+  model: yourModel,
+  tools: {
+    weather: tool({
+      description: 'Get the weather in a location',
+      parameters: z.object({
+        location: z.string().describe('The location to get the weather for'),
+      }),
+      execute: async ({ location }) => ({
+        location,
+        temperature: 72 + Math.floor(Math.random() * 21) - 10,
+      }),
+    }),
+  },
+  prompt: 'What is the weather in San Francisco?',
+});
+
+When a tool is used, the process is called a tool call, and its output is the tool result.
+
+Multi-Step Calls
+
+Enable multi-step calls with the maxSteps setting in generateText or streamText. Each step can include a text generation or tool call, looping until no further calls are needed or the maximum number of steps is reached.
+
+Example
+
+import { z } from 'zod';
+import { generateText, tool } from 'ai';
+
+const { text, steps } = await generateText({
+  model: yourModel,
+  tools: {
+    weather: tool({
+      description: 'Get the weather in a location',
+      parameters: z.object({
+        location: z.string().describe('The location to get the weather for'),
+      }),
+      execute: async ({ location }) => ({
+        location,
+        temperature: 72 + Math.floor(Math.random() * 21) - 10,
+      }),
+    }),
+  },
+  maxSteps: 5,
+  prompt: 'What is the weather in San Francisco?',
+});
+
+Accessing Steps
+
+Retrieve intermediate tool calls and results using the steps property:
+
+const allToolCalls = steps.flatMap(step => step.toolCalls);
+
+onStepFinish Callback
+
+Use onStepFinish to execute logic after each step:
+
+const result = await generateText({
+  onStepFinish({ text, toolCalls, toolResults }) {
+    // Save chat history or log usage
+  },
+});
+
+Tool Choice
+
+Control tool selection with the toolChoice setting:
+	•	auto (default): Model decides when and which tool to use.
+	•	required: Model must call a tool.
+	•	none: Model must not use tools.
+	•	{ type: 'tool', toolName: string }: Model must call the specified tool.
+
+Example
+
+const result = await generateText({
+  tools: {
+    weather: tool({
+      description: 'Get the weather in a location',
+      parameters: z.object({ location: z.string() }),
+      execute: async ({ location }) => ({ location, temperature: 72 }),
+    }),
+  },
+  toolChoice: 'required',
+  prompt: 'What is the weather in San Francisco?',
+});
+
+Error Handling
+
+AI SDK handles the following tool-call errors:
+	1.	NoSuchToolError: Tool not defined in the tools object.
+	2.	InvalidToolArgumentsError: Invalid arguments for the tool’s parameters.
+	3.	ToolExecutionError: Error during tool execution.
+
+Handling Errors
+
+try {
+  const result = await generateText({
+    // ...
+  });
+} catch (error) {
+  if (NoSuchToolError.isInstance(error)) {
+    // Handle missing tool
+  } else if (InvalidToolArgumentsError.isInstance(error)) {
+    // Handle invalid arguments
+  } else if (ToolExecutionError.isInstance(error)) {
+    // Handle execution error
+  }
+}
+
+Tool Call Repair
+
+Use experimental_repairToolCall to attempt repairs for invalid tool calls:
+
+const result = await generateText({
+  experimental_repairToolCall: async ({ toolCall, parameterSchema }) => {
+    // Repair logic here
+  },
+});
+
+Active Tools
+
+Limit active tools using experimental_activeTools:
+
+const { text } = await generateText({
+  tools: myToolSet,
+  experimental_activeTools: ['firstTool'],
+});
+
+Types
+
+Ensure type safety with helper types:
+
+import { CoreToolCallUnion, CoreToolResultUnion } from 'ai';
+
+type MyToolCall = CoreToolCallUnion<typeof myToolSet>;
+type MyToolResult = CoreToolResultUnion<typeof myToolSet>;
 

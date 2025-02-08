@@ -1,4 +1,5 @@
 "use client";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useState, useEffect } from "react";
@@ -15,8 +16,22 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { CheckCircle2, ChevronRight, ExternalLink, Clock, Loader2, RefreshCw, AlertCircle } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { 
+  CheckCircle2, 
+  ChevronRight, 
+  ExternalLink, 
+  Clock, 
+  Loader2, 
+  RefreshCw, 
+  AlertCircle,
+  Globe,
+  Key,
+  Lock
+} from "lucide-react";
 import { toast, Toaster } from "react-hot-toast";
+import { cn } from "@/lib/utils";
 
 const formSchema = z.object({
   vercelToken: z.string().min(1, "Vercel token is required").trim(),
@@ -24,11 +39,14 @@ const formSchema = z.object({
     .string()
     .min(1, "OpenAI API key is required")
     .trim()
-    // must start with sk- simple
     .regex(/^sk-/, "OpenAI API key must start with 'sk-'"),
 });
 
 type FormValues = z.infer<typeof formSchema>;
+
+interface DeploymentError extends Error {
+  message: string;
+}
 
 export function AutomatedSetup() {
   const [currentStep, setCurrentStep] = useState(1);
@@ -119,105 +137,103 @@ export function AutomatedSetup() {
 
   if (existingDeployment) {
     return (
-      <div className="space-y-6">
-        <Card className="border-none bg-gradient-to-b from-background to-muted/50 rounded-md p-4">
-          <CardHeader className="p-4">
-            <CardTitle className="flex items-center gap-2">
-              Deployment Status
-              <div className="flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-2 w-2 rounded-full bg-green-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
-              </div>
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-6 p-4">
-            {/* Project URL */}
+      <Card className="bg-gradient-to-br from-background to-muted/30">
+        <div className="grid gap-6 border rounded-lg p-4">
+          {/* Project URL */}
+          <div className="flex items-center gap-4">
+            <code className="flex-1 px-4 py-2 bg-muted/50 rounded-md text-sm font-mono break-all">
+              {existingDeployment.projectUrl}
+            </code>
+            <Button 
+              variant="outline" 
+              onClick={() => window.open(existingDeployment.projectUrl, '_blank')}
+              className="h-9 gap-2 bg-background/50 backdrop-blur-sm border-muted-foreground/20"
+            >
+              <Globe className="h-4 w-4" />
+              Visit Site
+              <ExternalLink className="h-3 w-3 ml-0.5 opacity-70" />
+            </Button>
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-6">
+            {/* Deployment Status */}
             <div className="space-y-2">
-              <h3 className="text-sm font-medium text-muted-foreground">Project URL</h3>
-              <div className="flex items-center gap-2">
-                <code className="px-2 py-1 bg-muted rounded text-sm break-all">
-                  {existingDeployment.projectUrl}
-                </code>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => {
-                    window.open(existingDeployment.projectUrl, '_blank');
-                  }}
-                >
-                  <ExternalLink className="h-4 w-4" />
-                </Button>
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <Globe className="h-4 w-4" />
+                <span>Deployment</span>
               </div>
-            </div>
-
-            {/* Actions */}
-            <div className="space-y-2">
-              <h3 className="text-sm font-medium text-muted-foreground">Actions</h3>
-              <div className="flex gap-2">
-                <Button
-                  variant="outline"
-                  onClick={handleRedeploy}
-                  disabled={isRedeploying}
-                  className="gap-2"
-                >
-                  {isRedeploying ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  ) : (
-                    <RefreshCw className="h-4 w-4" />
-                  )}
-                  {isRedeploying ? "Redeploying..." : "Redeploy Instance"}
-                </Button>
-              </div>
-            </div>
-
-            {/* Status Information */}
-            <div className="rounded-lg bg-muted/50 p-4 space-y-4">
-              <div className="flex items-start gap-3 text-muted-foreground">
-                <AlertCircle className="h-5 w-5 flex-shrink-0 mt-0.5" />
-                <div className="space-y-1">
-                  <p className="text-sm font-medium">Automatic Updates</p>
-                  <p className="text-sm">
-                    Your instance is automatically updated daily at midnight UTC. You can also
-                    manually trigger an update using the redeploy button above.
-                  </p>
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Plugin Setup Reminder */}
-        <Card className="rounded-md p-4">
-          <CardHeader className="p-4">
-            <CardTitle>Plugin Setup</CardTitle>
-          </CardHeader>
-          <CardContent className="p-4">
-            <div className="space-y-4">
-              <p className="text-sm text-muted-foreground">
-                Make sure your Obsidian plugin is configured with these settings:
-              </p>
-              <div className="space-y-2">
+              <div className="space-y-1.5">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium">Self-Hosting URL</span>
-                  <code className="px-2 py-1 bg-muted rounded text-xs">
-                    {existingDeployment.projectUrl}
-                  </code>
+                  <span className="text-xs text-muted-foreground">Status</span>
+                  <Badge 
+                    variant="default"
+                    className={cn(
+                      "text-xs bg-primary/15 text-primary hover:bg-primary/20"
+                    )}
+                  >
+                    Active
+                  </Badge>
+                </div>
+                {!isRedeploying && (
+                  <div className="flex items-center justify-between pt-1">
+                    <span className="text-xs text-muted-foreground">Action</span>
+                    <Button
+                      onClick={handleRedeploy}
+                      size="sm"
+                      variant="outline"
+                      className="h-6 text-xs gap-1.5 font-medium text-muted-foreground"
+                    >
+                      <RefreshCw className="h-3 w-3" />
+                      Redeploy
+                    </Button>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Plugin Setup */}
+            <div className="space-y-2">
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <Key className="h-4 w-4" />
+                <span>Plugin Setup</span>
+              </div>
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs text-muted-foreground">Self-Hosting URL</span>
+                  <Badge variant="outline" className="font-mono text-xs font-medium text-muted-foreground">
+                    Configured
+                  </Badge>
+                </div>
+                <div className="flex items-center justify-between pt-1">
+                  <span className="text-xs text-muted-foreground">Settings</span>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-6 text-xs gap-1.5 font-medium text-muted-foreground"
+                    asChild
+                  >
+                    <a href="obsidian://show-plugin?id=fileorganizer2000">
+                      Open Plugin
+                    </a>
+                  </Button>
                 </div>
               </div>
-              <Button
-                variant="outline"
-                size="sm"
-                asChild
-                className="w-full"
-              >
-                <a href="obsidian://show-plugin?id=fileorganizer2000">
-                  Open Plugin Settings
-                </a>
-              </Button>
             </div>
-          </CardContent>
-        </Card>
-      </div>
+          </div>
+
+          {/* Status Information */}
+          <div className="border-t border-background-modifier-border pt-4">
+            <Alert className="bg-primary/5 border-primary/10">
+              <AlertCircle className="h-4 w-4 text-primary" />
+              <AlertTitle className="text-primary">Automatic Updates</AlertTitle>
+              <AlertDescription className="text-primary/90">
+                Your instance is automatically updated daily at midnight UTC. You can also
+                manually trigger an update using the redeploy button above.
+              </AlertDescription>
+            </Alert>
+          </div>
+        </div>
+      </Card>
     );
   }
 
@@ -242,7 +258,7 @@ export function AutomatedSetup() {
         licenseKey: result.licenseKey,
         projectUrl: result.projectUrl,
       });
-      setCurrentStep(3); // Move to final step after successful deployment
+      setCurrentStep(3);
     } catch (error: any) {
       setDeploymentStatus({
         isDeploying: false,
@@ -253,54 +269,6 @@ export function AutomatedSetup() {
       });
     }
   };
-  console.log(form.formState, "form state");
-
-  const TroubleshootingSection = () => (
-    <div className="mt-8 border-t pt-6">
-      <details className="group">
-        <summary className="flex items-center justify-between cursor-pointer">
-          <h4 className="font-medium text-muted-foreground">
-            Troubleshooting Guide
-          </h4>
-          <ChevronRight className="h-4 w-4 transition-transform group-open:rotate-90" />
-        </summary>
-        <div className="mt-4 space-y-4 text-sm text-muted-foreground">
-          <div className="space-y-2">
-            <h5 className="font-medium">Common Issues:</h5>
-            <ul className="list-disc list-inside space-y-2 ml-2">
-              <li>
-                <span className="font-medium">Deployment Stuck:</span> If your deployment seems stuck, check the build logs on Vercel by clicking on the deployment URL and navigating to the "Runtime Logs" tab.
-              </li>
-              <li>
-                <span className="font-medium">Invalid Project URL:</span> Make sure you're using the production URL from your Vercel deployment (usually ends with .vercel.app unless you've configured a custom domain).
-              </li>
-              <li>
-                <span className="font-medium">License Key Not Working:</span> Verify that you've copied the entire license key without any extra spaces.
-              </li>
-            </ul>
-          </div>
-          
-          <div className="bg-muted/50 p-4 rounded-lg mt-4">
-            <p>
-              If you continue experiencing issues, please email{" "}
-              <a 
-                href="mailto:alex@fileorganizer2000.com"
-                className="text-primary hover:underline"
-              >
-                alex@fileorganizer2000.com
-              </a>{" "}
-              with:
-            </p>
-            <ul className="list-disc list-inside mt-2 ml-2">
-              <li>Your deployment URL</li>
-              <li>Screenshots of any error messages</li>
-              <li>Steps you've tried so far</li>
-            </ul>
-          </div>
-        </div>
-      </details>
-    </div>
-  );
 
   const steps = [
     {
@@ -391,15 +359,29 @@ export function AutomatedSetup() {
               )}
             />
 
-            <Button
-              type="submit"
-              disabled={deploymentStatus.isDeploying || !form.formState.isValid}
-              className="w-full"
-            >
-              {deploymentStatus.isDeploying
-                ? "Deploying..."
-                : "Deploy to Vercel"}
-            </Button>
+            <div className="flex justify-between items-center gap-4">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setCurrentStep(1)}
+              >
+                Back
+              </Button>
+              <Button
+                type="submit"
+                disabled={deploymentStatus.isDeploying || !form.formState.isValid}
+                className="flex-1"
+              >
+                {deploymentStatus.isDeploying ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Deploying...
+                  </>
+                ) : (
+                  "Deploy to Vercel"
+                )}
+              </Button>
+            </div>
           </form>
         </Form>
       ),
@@ -458,6 +440,7 @@ export function AutomatedSetup() {
                       navigator.clipboard.writeText(
                         deploymentStatus.licenseKey!
                       );
+                      toast.success("License key copied to clipboard");
                     }}
                   >
                     Copy
@@ -481,7 +464,10 @@ export function AutomatedSetup() {
                       variant="outline"
                       size="sm"
                       className="ml-2"
-                      onClick={() => navigator.clipboard.writeText(deploymentStatus.projectUrl!)}
+                      onClick={() => {
+                        navigator.clipboard.writeText(deploymentStatus.projectUrl!);
+                        toast.success("Project URL copied to clipboard");
+                      }}
                     >
                       Copy
                     </Button>
@@ -493,7 +479,7 @@ export function AutomatedSetup() {
                 <div className="mt-2">
                   <a href="obsidian://show-plugin?id=fileorganizer2000">
                     <Button variant="outline" size="sm">
-                      Download Plugin
+                      Open Plugin Settings
                     </Button>
                   </a>
                 </div>
@@ -501,11 +487,24 @@ export function AutomatedSetup() {
               <li>Open Obsidian settings and go to File Organizer settings</li>
               <li>Click on Advanced and enable "Self-Hosting" toggle</li>
               <li>Enter your project URL and license key in the settings</li>
-              <li>Click "Activate" to complete the setup</li>
+              <li>Click "Activate" in the general settings tab to complete the setup</li>
             </ol>
           </div>
 
-          <TroubleshootingSection />
+          <div className="flex justify-between items-center gap-4">
+            <Button
+              variant="outline"
+              onClick={() => setCurrentStep(2)}
+            >
+              Back
+            </Button>
+            <Button
+              onClick={() => window.location.reload()}
+              className="flex-1"
+            >
+              Complete Setup
+            </Button>
+          </div>
         </div>
       ),
     },
@@ -605,17 +604,7 @@ export function AutomatedSetup() {
               <div className="rounded-lg bg-destructive/5 border border-destructive/20 p-4">
                 <div className="flex items-center gap-3">
                   <div className="rounded-full bg-destructive/10 p-1">
-                    <svg
-                      className="h-5 w-5 text-destructive"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                    >
-                      <circle cx="12" cy="12" r="10" />
-                      <line x1="12" y1="8" x2="12" y2="12" />
-                      <line x1="12" y1="16" x2="12.01" y2="16" />
-                    </svg>
+                    <AlertCircle className="h-5 w-5 text-destructive" />
                   </div>
                   <div>
                     <p className="font-medium text-destructive">

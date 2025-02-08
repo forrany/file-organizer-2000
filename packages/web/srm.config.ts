@@ -29,7 +29,12 @@ export type SubscriptionWebhookEvent =
 
 // Product and plan types for type safety
 export type ProductType = "subscription" | "lifetime" | "top_up";
-export type Plan = "monthly" | "yearly" | "lifetime" | "top_up";
+export type Plan =
+  | "monthly"
+  | "yearly"
+  | "lifetime_license"
+  | "one_year_license"
+  | "top_up";
 export type PlanType = "subscription" | "pay-once";
 
 // Pricing configuration
@@ -42,18 +47,24 @@ export const PRICES = {
 } as const;
 
 const cloudFeatures = [
-  "AI-Powered File Organization",
+  "No external AI credits needed",
+  "Seamless no-sweat setup",
   "~1000 files per month",
   "300 min audio transcription p/m",
-  "Premium support",
+  "Support",
+  "30 days money-back guarantee",
 ];
 
 const standardPayOnceFeatures = [
-  "Premium Support",
-  "Quick-guided setup",
-  "Requires your own OpenAI key",
-  "Pay-as-you-go",
-  "30-day money-back guarantee",
+  "Requires your own openAI api key (pay as you go)",
+  "Privacy-focused",
+  "Quick guided setup",
+  "Unlimited usage",
+  "Early access features",
+  "Premium support",
+  "Onboarding call with one of the founders (on request)",
+  "30 days money-back guarantee",
+
 ];
 
 export interface ProductMetadata {
@@ -147,7 +158,7 @@ export const getTargetUrl = () => {
   if (process.env.VERCEL_ENV === "preview") {
     return process.env.VERCEL_PROJECT_PREVIEW_URL;
   }
-  return "localhost:3000";
+  return "localhost:3010";
 };
 
 // Helper to validate webhook metadata

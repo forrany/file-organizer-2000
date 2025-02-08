@@ -24,7 +24,8 @@ export async function createPayOnceLifetimeCheckout() {
   if (!userId) throw new Error("Not authenticated");
   const metadata = {
     userId,
-    type: "pay-once",
+    type: PRODUCTS.PayOnceLifetime.metadata.type,
+    plan: PRODUCTS.PayOnceLifetime.metadata.plan,
   };
 
   const { success, cancel, lifetime } = getUrls();
@@ -149,7 +150,7 @@ export async function createPayOnceOneYearCheckout() {
   const { userId } = await auth();
   if (!userId) throw new Error("Not authenticated");
 
-  const { success, cancel } = getUrls();
+  const { success, cancel, lifetime } = getUrls();
 
   const session = await stripe.checkout.sessions.create({
     mode: "payment",
@@ -174,7 +175,7 @@ export async function createPayOnceOneYearCheckout() {
         quantity: 1,
       },
     ],
-    success_url: success,
+    success_url: lifetime,
     cancel_url: cancel,
     allow_promotion_codes: true,
   });

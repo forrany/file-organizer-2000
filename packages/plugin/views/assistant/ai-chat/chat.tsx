@@ -1,6 +1,8 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { useChat, UseChatOptions } from "@ai-sdk/react";
 import { moment } from "obsidian";
+import { Button } from "@/components/ui/button";
+import { RefreshCw } from "lucide-react";
 
 import FileOrganizer from "../../..";
 import { GroundingMetadata, DataChunk } from "./types/grounding";
@@ -18,14 +20,21 @@ import { ModelSelector } from "./model-selector";
 import { ModelType } from "./types";
 import { AudioRecorder } from "./audio-recorder";
 import { logger } from "../../../services/logger";
+import { SearchToggle } from "./components/search-toggle";
 import { SubmitButton } from "./submit-button";
 import { getUniqueReferences, useContextItems } from "./use-context-items";
 import { ContextItems } from "./components/context-items";
 import { ClearAllButton } from "./components/clear-all-button";
 import { useCurrentFile } from "./hooks/use-current-file";
 import { SearchAnnotationHandler } from "./tool-handlers/search-annotation-handler";
-import { isSearchResultsAnnotation, SearchResultsAnnotation } from "./types/annotations";
+import {
+  isSearchResultsAnnotation,
+  SearchResultsAnnotation,
+} from "./types/annotations";
 import { ExamplePrompts } from "./components/example-prompts";
+import { AttachmentHandler } from './components/attachment-handler';
+import { LocalAttachment } from './types/attachments';
+import { AlertCircle } from "lucide-react";
 
 interface ChatComponentProps {
   plugin: FileOrganizer;
@@ -79,29 +88,35 @@ export const ChatComponent: React.FC<ChatComponentProps> = ({
         files: Object.fromEntries(
           Object.entries(files).map(([id, file]) => [
             id,
-            { ...file, content: '' }
+            { ...file, content: "" },
           ])
         ),
         folders: Object.fromEntries(
           Object.entries(folders).map(([id, folder]) => [
             id,
-            { ...folder, files: folder.files.map(f => ({ ...f, content: '' })) }
+            {
+              ...folder,
+              files: folder.files.map(f => ({ ...f, content: "" })),
+            },
           ])
         ),
         tags: Object.fromEntries(
           Object.entries(tags).map(([id, tag]) => [
             id,
-            { ...tag, files: tag.files.map(f => ({ ...f, content: '' })) }
+            { ...tag, files: tag.files.map(f => ({ ...f, content: "" })) },
           ])
         ),
         searchResults: Object.fromEntries(
           Object.entries(searchResults).map(([id, search]) => [
             id,
-            { ...search, results: search.results.map(r => ({ ...r, content: '' })) }
+            {
+              ...search,
+              results: search.results.map(r => ({ ...r, content: "" })),
+            },
           ])
         ),
         // Keep these as is
-        currentFile: currentFile ? { ...currentFile, content: '' } : null,
+        currentFile: currentFile ? { ...currentFile, content: "" } : null,
         screenpipe,
         textSelections,
       };
@@ -116,6 +131,7 @@ export const ChatComponent: React.FC<ChatComponentProps> = ({
     enableScreenpipe: plugin.settings.enableScreenpipe,
     newUnifiedContext: contextString,
     model: plugin.settings.selectedModel, // Pass selected model to server
+    enableSearchGrounding: plugin.settings.enableSearchGrounding,
   };
 
   const [groundingMetadata, setGroundingMetadata] =
@@ -129,6 +145,8 @@ export const ChatComponent: React.FC<ChatComponentProps> = ({
     handleSubmit,
     stop,
     addToolResult,
+    error,
+    reload,
   } = useChat({
     onDataChunk: (chunk: DataChunk) => {
       if (chunk.type === "metadata" && chunk.data?.groundingMetadata) {
@@ -148,8 +166,7 @@ export const ChatComponent: React.FC<ChatComponentProps> = ({
       // Handle different model types
       if (
         !plugin.settings.showLocalLLMInChat ||
-        selectedModel === "gpt-4o" ||
-        selectedModel === "gemini-2.0-flash-exp"
+        selectedModel === "gpt-4o"
       ) {
         // Use server fetch for non-local models
         return fetch(url, options);
@@ -183,13 +200,20 @@ export const ChatComponent: React.FC<ChatComponentProps> = ({
     onError: error => {
       logger.error(error.message);
       setErrorMessage(
-        "Connection failed. If the problem persists, please check your internet connection or VPN."
+        error.message ||
+          "Connection failed. If the problem persists, please check your internet connection or VPN."
       );
     },
     onFinish: () => {
       setErrorMessage(null);
     },
   } as UseChatOptions);
+
+  const [attachments, setAttachments] = useState<LocalAttachment[]>([]);
+
+  const handleAttachmentsChange = useCallback((newAttachments: LocalAttachment[]) => {
+    setAttachments(newAttachments);
+  }, []);
 
   const handleSendMessage = (e: React.FormEvent<HTMLFormElement>) => {
     logger.debug("handleSendMessage", e, input);
@@ -199,7 +223,18 @@ export const ChatComponent: React.FC<ChatComponentProps> = ({
       return;
     }
 
-    handleSubmit(e, { body: chatBody });
+    const messageBody = {
+      ...chatBody,
+      experimental_attachments: attachments.map(({ id, size, ...attachment }) => ({
+        name: attachment.name,
+        contentType: attachment.contentType,
+        url: attachment.url,
+      })),
+    };
+
+    handleSubmit(e, { body: messageBody });
+    // Clear attachments after sending
+    setAttachments([]);
   };
 
   const handleCancelGeneration = () => {
@@ -253,13 +288,55 @@ export const ChatComponent: React.FC<ChatComponentProps> = ({
     } as React.ChangeEvent<HTMLInputElement>);
   };
 
+  const handleRetry = () => {
+    setErrorMessage(null);
+    reload();
+  };
+
   return (
     <div className="flex flex-col h-full">
-      <div className="flex-grow overflow-y-auto p-4 h-full">
-        <div className="flex flex-col min-h-min-content">
+      {/* Chat Header */}
+      <div className="border-b border-[--background-modifier-border] p-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-3">
+            <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
+              <span role="img" aria-label="ai" className="text-lg">🤖</span>
+            </div>
+            <div>
+              <h2 className="text-lg font-medium">AI Assistant</h2>
+              <p className="text-sm text-[--text-muted]">
+                {isGenerating ? "Processing..." : "Ready to help"}
+              </p>
+            </div>
+          </div>
+   
+        </div>
+      </div>
+
+      {/* Chat Messages */}
+      <div className="flex-grow overflow-y-auto p-4">
+        <div className="flex flex-col space-y-4">
+          {errorMessage && (
+            <div className="bg-[--background-modifier-error] bg-opacity-10 text-[--text-error] p-4 rounded-lg flex items-center justify-between">
+              <span className="flex items-center">
+                <AlertCircle className="w-5 h-5 mr-2" />
+                {errorMessage}
+              </span>
+              <Button
+                onClick={handleRetry}
+                variant="outline"
+                size="sm"
+                className="text-[--text-error]"
+              >
+                <RefreshCw className="w-4 h-4 mr-1" />
+                Retry
+              </Button>
+            </div>
+          )}
+
           {messages.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-full">
-              <h3 className="text-[--text-normal] mb-4">Try these examples</h3>
+            <div className="flex flex-col items-center justify-center py-12">
+              <h3 className="text-[--text-normal] mb-4 text-lg font-medium">Try these examples</h3>
               <ExamplePrompts onExampleClick={handleExampleClick} />
             </div>
           ) : (
@@ -271,7 +348,7 @@ export const ChatComponent: React.FC<ChatComponentProps> = ({
                     return (
                       <SearchAnnotationHandler
                         key={`${message.id}-annotation-${index}`}
-                        annotation={annotation as SearchResultsAnnotation}
+                        annotation={annotation}
                       />
                     );
                   }
@@ -292,6 +369,26 @@ export const ChatComponent: React.FC<ChatComponentProps> = ({
               </React.Fragment>
             ))
           )}
+
+          {isGenerating && (
+            <div className="flex items-center space-x-4 bg-[--background-primary-alt] border border-[--background-modifier-border] rounded-lg p-3">
+              <div className="flex items-center space-x-2">
+                <div className="h-2 w-2 bg-primary rounded-full animate-pulse"></div>
+                <span className="text-sm">Processing request</span>
+              </div>
+              <div className="text-sm text-[--text-muted]">|</div>
+              <div className="flex items-center space-x-2">
+                <div className="h-2 w-2 bg-[--text-muted] rounded-full"></div>
+                <span className="text-sm text-[--text-muted]">Analyzing context</span>
+              </div>
+              <div className="text-sm text-[--text-muted]">|</div>
+              <div className="flex items-center space-x-2">
+                <div className="h-2 w-2 bg-[--text-muted] rounded-full"></div>
+                <span className="text-sm text-[--text-muted]">Generating response</span>
+              </div>
+            </div>
+          )}
+
           <div ref={messagesEndRef} />
           {groundingMetadata && (
             <SourcesSection groundingMetadata={groundingMetadata} />
@@ -299,39 +396,76 @@ export const ChatComponent: React.FC<ChatComponentProps> = ({
         </div>
       </div>
 
+      {/* Chat Input Section */}
       <div className="border-t border-[--background-modifier-border] p-4">
         <div className="flex items-center space-x-2 mb-4">
           <ContextItems />
-
           <ClearAllButton />
         </div>
 
-        <form onSubmit={handleSendMessage} className="flex items-end">
-          <div className="flex-grow overflow-y-auto relative" ref={inputRef}>
-            <Tiptap
-              value={input}
-              onChange={handleTiptapChange}
-              onKeyDown={handleKeyDown}
-            />
+                {/* Tip about adding @file, @tag, or @folder */}
+                <div className="text-[--text-muted] text-sm mt-2 mb-2 ml-2">
+          Tip: Enter <code>@note</code>, <code>@tag</code>, or{" "}
+          <code>@folder</code> to add items to context.
+        </div>
 
-            <div className="absolute bottom-0 right-0 h-full flex items-center">
-              <AudioRecorder
-                onTranscriptionComplete={handleTranscriptionComplete}
+        <form onSubmit={handleSendMessage} className="flex flex-col space-y-4">
+          <div className={`flex flex-grow ${error ? "opacity-50 pointer-events-none" : ""}`}>
+            <div className="overflow-y-auto relative w-full" ref={inputRef}>
+              <Tiptap
+                value={input}
+                onChange={handleTiptapChange}
+                onKeyDown={handleKeyDown}
               />
+
+              <div className="absolute bottom-0 right-12 h-full flex items-center space-x-2">
+                <AudioRecorder onTranscriptionComplete={handleTranscriptionComplete} />
+              </div>
             </div>
+            <SubmitButton isGenerating={isGenerating} />
           </div>
-          <SubmitButton isGenerating={isGenerating} />
+
+          {/* Enhancement Options */}
+          <div className="grid grid-cols-3 gap-4">
+            <Button
+              variant="outline"
+              className="flex items-center justify-center space-x-2 bg-[--background-primary-alt]"
+              onClick={() => handleExampleClick("Can you summarize this for me?")}
+            >
+              <span role="img" aria-label="summary" className="text-lg">📝</span>
+              <span>Quick Summary</span>
+            </Button>
+            <Button
+              variant="outline"
+              className="flex items-center justify-center space-x-2 bg-[--background-primary-alt]"
+              onClick={() => handleExampleClick("What are the key points?")}
+            >
+              <span role="img" aria-label="key points" className="text-lg">🎯</span>
+              <span>Key Points</span>
+            </Button>
+            <Button
+              variant="outline"
+              className="flex items-center justify-center space-x-2 bg-[--background-primary-alt]"
+              onClick={() => handleExampleClick("Extract action items from this.")}
+            >
+              <span role="img" aria-label="action items" className="text-lg">✅</span>
+              <span>Action Items</span>
+            </Button>
+          </div>
         </form>
 
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between mt-4">
           <ContextLimitIndicator
             unifiedContext={contextString}
             maxContextSize={maxContextSize}
           />
-          <ModelSelector
-            selectedModel={selectedModel}
-            onModelSelect={setSelectedModel}
-          />
+          <div className="flex items-center space-x-2">
+            <SearchToggle selectedModel={selectedModel} />
+            <ModelSelector
+              selectedModel={selectedModel}
+              onModelSelect={setSelectedModel}
+            />
+          </div>
         </div>
       </div>
     </div>
