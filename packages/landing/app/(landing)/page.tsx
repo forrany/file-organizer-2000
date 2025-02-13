@@ -30,7 +30,12 @@ export const metadata: Metadata = {
 export default function Page() {
   return (
     <main className="flex min-h-screen flex-col items-center bg-background text-gray-700">
-    
+      {/* Name Change Banner */}
+      <div className="w-full bg-primary/5 border-b border-primary/10">
+        <div className="max-w-7xl mx-auto px-6 py-2 text-center text-sm text-muted-foreground">
+          File Organizer 2000 is now Note Companion
+        </div>
+      </div>
 
       {/* Hero Section */}
       <div className="w-full max-w-5xl px-6 py-12 sm:py-12 lg:px-8 text-center bg-transparent">
@@ -49,7 +54,11 @@ export default function Page() {
             <span className="text-primary block">Obsidian Workflow</span>
           </h1>
           <p className="mt-6 text-lg leading-8">
-            Note Companion is an Obsidian plugin that packs a powerful AI chat, automatic organization suggestions, and other wizardry.
+          
+           Note Companion is an AI-powered Obsidian plugin that improves your workflow by automatically organizing and formatting your notes—so you don't have to.
+
+
+           {/* It gives you automatic organization suggestions,  packs a powerful AI chat, and other wizardry such as audio transcription, meeting notes enhancement, and ai image processing (OCR). */}
           </p>
           <div className="mt-10 flex items-center justify-center gap-x-6">
             <a href="https://app.fileorganizer2000.com">
@@ -89,70 +98,6 @@ export default function Page() {
         </div>
       </div>
 
-      {/* Features Section */}
-      <div className="w-full py-24 bg-transparent">
-        <div className="mx-auto max-w-7xl px-6">
-          {/* First Feature */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-16 items-center mb-32">
-            <div>
-              <h2 className="text-3xl font-bold mb-4">Get organization suggestions for tags, folders, titles and templates.</h2>
-              <div className="relative aspect-[16/9] rounded-lg overflow-hidden ">
-                <Image
-                  src="https://framerusercontent.com/images/oURi6azSaqZ0OgErlSpbW6jBk.png"
-                  alt="Organization Features"
-                  layout="fill"
-                  objectFit="cover"
-                  className="rounded-lg"
-                />
-              </div>
-            </div>
-            <div>
-              <p className="text-lg">
-                Let the AI do the thinking. Save your energy for what really matters.
-              </p>
-            </div>
-          </div>
-
-          {/* Second Feature */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-16 items-center mb-32">
-            <div className="relative aspect-[16/9] rounded-lg overflow-hidden ">
-              <Image
-                src="https://framerusercontent.com/images/deE4ZtaaqL7JMy9otNozH4yHZE.png"
-                alt="Auto-Organization"
-                layout="fill"
-                objectFit="cover"
-                className="rounded-lg"
-              />
-            </div>
-            <div>
-              <h2 className="text-3xl font-bold mb-6">Auto-Organizes & Formats your Notes</h2>
-              <p className="text-lg">
-                Automate your organization workflow with the Inbox so you can get rid of the busywork that keeps slowing you down.
-              </p>
-            </div>
-          </div>
-
-          {/* Third Feature */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-16 items-center">
-            <div>
-              <h2 className="text-3xl font-bold mb-4">Powerful AI Chat</h2>
-              <p className="text-lg">
-                Allowing you to summarize youtube videos, search the web, or manage your vault with the latest GPT-4o model.
-              </p>
-            </div>
-            <div className="relative aspect-[4/3] rounded-lg overflow-hidden ">
-              <Image
-                src="https://framerusercontent.com/images/SarnueYFDCLxQFTzsbEDNshz3n0.png"
-                alt="AI Chat Features"
-                layout="fill"
-                objectFit="contain"
-                className="rounded-lg"
-              />
-            </div>
-          </div>
-        </div>
-      </div>
-
       {/* Meet Your All-in-One Workflow Buddy */}
       <div className="w-full py-24 bg-white/5 backdrop-blur-sm">
         <div className="mx-auto max-w-7xl px-6">
@@ -170,7 +115,16 @@ export default function Page() {
                 Instantly organize any dragged-and-dropped file. Note Companion automatically detects relevant tags and suggests the best folder or location.
               </p>
             </div>
-
+            {/* Chat Feature */}
+            <div className="bg-background/60 backdrop-blur-sm p-8 rounded-xl border border-border/40">
+              <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center mb-6">
+                <MessageSquare className="h-6 w-6 text-primary" />
+              </div>
+              <h3 className="text-xl font-semibold mb-3">Chat</h3>
+              <p className="text-muted-foreground mb-4">
+                Chat directly with your notes and bring other documents or folders into the conversation with a simple @ mention. Ask Note Companion to modify text, add summaries, rename files, or even split your notes—all in real time.
+              </p>
+            </div>
             {/* Meetings Feature */}
             <div className="bg-background/60 backdrop-blur-sm p-8 rounded-xl border border-border/40">
               <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center mb-6">
@@ -182,18 +136,81 @@ export default function Page() {
               </p>
             </div>
 
-            {/* Chat Feature */}
-            <div className="bg-background/60 backdrop-blur-sm p-8 rounded-xl border border-border/40">
-              <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center mb-6">
-                <MessageSquare className="h-6 w-6 text-primary" />
-              </div>
-              <h3 className="text-xl font-semibold mb-3">Chat</h3>
-              <p className="text-muted-foreground mb-4">
-                Chat directly with your notes and bring other documents or folders into the conversation with a simple @ mention. Ask Note Companion to modify text, add summaries, rename files, or even split your notes—all in real time.
+
+          </div>
+        </div>
+      {/* Features Section */}
+      <section className="py-24 space-y-32">
+        {/* Feature 1 - Image on left */}
+        <div className="container">
+          <div className="flex flex-col md:flex-row items-center gap-12">
+            <div className="flex-1">
+              <Image
+                src="https://framerusercontent.com/images/oURi6azSaqZ0OgErlSpbW6jBk.png"
+                width={700}
+                height={700}
+                alt="Organization Features"
+                className="rounded-lg"
+              />
+            </div>
+            <div className="flex-1 space-y-4">
+              <h2 className="text-2xl font-bold">
+                Get organization suggestions for tags, folders, titles and templates.
+              </h2>
+              <p className="text-muted-foreground">
+                Let the AI do the thinking. Save your energy for what really matters.
               </p>
             </div>
           </div>
         </div>
+
+        {/* Feature 2 - Image on right */}
+        <div className="container">
+          <div className="flex flex-col md:flex-row-reverse items-center gap-12">
+            <div className="flex-1">
+              <Image
+                src="https://framerusercontent.com/images/JYKEtCqETrv0vvMyVUQsN561kT0.png"
+                width={500}
+                height={500}
+                alt="Auto-Organization"
+                className="rounded-lg "
+              />
+            </div>
+            <div className="flex-1 space-y-4">
+              <h2 className="text-2xl font-bold">
+                Auto-Organizes & Formats your Notes
+              </h2>
+              <p className="text-muted-foreground">
+                Automate your organization workflow with the Inbox so you can get rid of the busywork that keeps slowing you down.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Feature 3 - Image on left */}
+        <div className="container">
+          <div className="flex flex-col md:flex-row items-center gap-12">
+            <div className="flex-1">
+              <Image
+                src="https://framerusercontent.com/images/SarnueYFDCLxQFTzsbEDNshz3n0.png"
+                width={500}
+                height={500}
+                alt="AI Chat Features"
+                className="rounded-lg "
+              />
+            </div>
+            <div className="flex-1 space-y-4">
+              <h2 className="text-2xl font-bold">
+                Powerful AI Chat
+              </h2>
+              <p className="text-muted-foreground">
+                Allowing you to summarize youtube videos, search the web, or manage your vault with the latest GPT-4o model.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
       </div>
 
       {/* Why Note Companion */}
@@ -251,9 +268,9 @@ export default function Page() {
             <h2 className="text-3xl font-bold tracking-tight sm:text-4xl mb-4">
               Simple, Flexible Pricing
             </h2>
-            <p className="text-lg text-muted-foreground mb-12">
+            {/* <p className="text-lg text-muted-foreground mb-12">
               Whether you're a solo note-taker or a power user looking for advanced features, we've got you covered.
-            </p>
+            </p> */}
             <div className="bg-[#EBF5FF] border-1 border-[#2E90FA] rounded-lg p-4 mb-12 max-w-3xl mx-auto text-center">
               <p className="text-[#1570EF]">
                 Educators and students qualify for a 50% discount on the Lifetime plan or a special Monthly rate of $9. To claim this offer, please reach out at alex@fileorganizer2000.com via your education email.
@@ -309,7 +326,7 @@ export default function Page() {
               Ready to revolutionize your note-taking?
             </h2>
             <p className="text-lg text-muted-foreground mb-10">
-              Get Note Companion and enjoy a 7-day free trial on any paid plan. Bring order to your Obsidian vault. Stop wrestling with messy notes and let AI handle the tedious tasks—so you can focus on what really matters.
+              Get Note Companion and enjoy a 7-day free trial on the yearly plan. Bring order to your Obsidian vault. Stop wrestling with messy notes and let AI handle the tedious tasks—so you can focus on what really matters.
             </p>
             <div className="flex items-center justify-center gap-x-6">
               <a href="https://app.fileorganizer2000.com">
