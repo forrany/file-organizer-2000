@@ -1,5 +1,5 @@
 import { db, UserUsageTable } from "@/drizzle/schema";
-import { eq, and } from "drizzle-orm";
+import { eq, and, or } from "drizzle-orm";
 import { NextResponse } from "next/server";
 
 export const runtime = "edge";
@@ -16,8 +16,21 @@ async function resetTokenUsage() {
     })
     .where(
       and(
-        eq(UserUsageTable.subscriptionStatus, "active"),
-        eq(UserUsageTable.paymentStatus, "paid")
+        or(
+          eq(UserUsageTable.subscriptionStatus, "active"),
+          eq(UserUsageTable.subscriptionStatus, "succeeded"),
+          eq(UserUsageTable.subscriptionStatus, "paid")
+        ),
+        or(
+          eq(UserUsageTable.paymentStatus, "paid"),
+          eq(UserUsageTable.paymentStatus, "succeeded")
+        ),
+        or(
+          eq(UserUsageTable.billingCycle, "monthly"),
+          eq(UserUsageTable.billingCycle, "yearly"),
+          eq(UserUsageTable.billingCycle, "subscription"),
+          eq(UserUsageTable.billingCycle, "default")
+        ),
       )
     );
 

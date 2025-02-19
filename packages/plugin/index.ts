@@ -305,6 +305,40 @@ export default class FileOrganizer extends Plugin {
     }
   }
 
+  async streamFormatAppendInCurrentNote({
+    file,
+    formattingInstruction,
+    content,
+  }: {
+    file: TFile;
+    formattingInstruction: string;
+    content: string;
+  }): Promise<void> {
+    try {
+      new Notice("Appending formatted content...", 3000);
+
+      let formattedContent = "";
+      const updateCallback = async (partialContent: string) => {
+        formattedContent = partialContent;
+      };
+
+      await this.formatStream(
+        content,
+        formattingInstruction,
+        this.getServerUrl(),
+        this.settings.API_KEY,
+        updateCallback
+      );
+
+      await this.app.vault.append(file, "\n\n" + formattedContent);
+
+      new Notice("Content appended successfully", 3000);
+    } catch (error) {
+      logger.error("Error appending content:", error);
+      new Notice("An error occurred while appending content.", 6000);
+    }
+  }
+
   async streamFormatInCurrentNoteLineByLine({
     file,
     formattingInstruction,
@@ -843,7 +877,12 @@ export default class FileOrganizer extends Plugin {
       return;
     }
 
-    await this.app.vault.append(file, `\n${formattedTag}`);
+    // If we find no '#' symbol at all, add a blank line before appending the first tag
+    if (!fileContent.includes("#")) {
+      await this.app.vault.append(file, `\n\n${formattedTag}`);
+    } else {
+      await this.app.vault.append(file, `\n${formattedTag}`);
+    }
   }
 
   async ensureAssistantView(): Promise<AssistantViewWrapper | null> {
@@ -1091,4 +1130,6 @@ export default class FileOrganizer extends Plugin {
     workspace.revealLeaf(leaf);
     return leaf.view as DashboardView;
   }
+
+  
 }
