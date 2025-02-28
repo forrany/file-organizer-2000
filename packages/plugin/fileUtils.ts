@@ -27,6 +27,8 @@ export async function checkAndCreateTemplates(
   settings: FileOrganizerSettings
 ) {
   const meetingNoteTemplatePath = `${settings.templatePaths}/meeting_note.md`;
+  const youtubeVideoTemplatePath = `${settings.templatePaths}/youtube_video.md`;
+  const enhanceTemplatePath = `${settings.templatePaths}/enhance.md`;
 
   if (!(await app.vault.adapter.exists(meetingNoteTemplatePath))) {
     await app.vault.create(
@@ -64,6 +66,102 @@ Output Format:
 - Key excerpts from Transcript 2: [Relevant excerpts related to discussion points and action items].  
 - Key highlights from Written Notes: [Direct quotes or summaries from notes].  
 `
+    );
+  }
+
+  if (!(await app.vault.adapter.exists(youtubeVideoTemplatePath))) {
+    await app.vault.create(
+      youtubeVideoTemplatePath,
+      `Please create an Obsidian note using the video link and any available transcript or additional context. The note must include:
+
+1. Frontmatter (at the top) with the following properties:
+
+---
+
+topics: {{any relevant topics}}
+
+tags: [#youtube, {{#any other relevant tags}}]
+
+summary: {{short summary of the video}}
+
+---
+
+2. A YouTube embed link in the following format:
+
+[![YouTube Video](https://www.youtube.com/watch?v=XXXXXXX)](https://www.youtube.com/watch?v=XXXXXXX)
+
+3. A comprehensive, detailed summary of the key points from the video (below the embed link).
+
+**Instructions:**
+
+- First, determine or generate the values needed for the frontmatter (title, channel, date published, summary, etc.).
+
+- Maintain the exact markdown syntax for the frontmatter block (\`---\` at the top and bottom).
+
+- Use the YouTube link format exactly as provided. Do not remove the brackets, parentheses, or exclamation point.
+
+- In the main body of the note, provide a longer-form summary describing all major points from the video.
+- do not use \`\`\` \`\`\` or markdown formatting. Very important
+- make sure published date is the date the video was published. Not the date
+
+**Example Output Format** (template):
+
+---
+
+topics: "relevant topics"
+
+tags: ["YouTube", "football"]
+
+summary: "A short overview of the video's main theme."
+
+---
+
+[![YouTube Video](https://www.youtube.com/watch?v=XXXXXXX)](https://www.youtube.com/watch?v=XXXXXXX)
+
+**Detailed Summary:**
+
+- Key point 1…
+
+- Key point 2…
+
+- Etc.`
+    );
+  }
+
+  if (!(await app.vault.adapter.exists(enhanceTemplatePath))) {
+    await app.vault.create(
+      enhanceTemplatePath,
+      `1. **Use Headings and Subheadings**: Clearly define sections with headings (e.g.,
+\`\`\`
+#
+\`\`\`
+,
+\`\`\`
+##
+\`\`\`
+,
+\`\`\`
+###
+\`\`\`
+) to organize content hierarchically.
+
+2. **Bullet Points and Lists**: Use bullet points or numbered lists to break down information into digestible parts.
+
+3. **Consistent Spacing**: Ensure consistent spacing between sections and paragraphs for better readability.
+
+4. **Highlight Key Points**: Use bold or italics to emphasize important information or key terms.
+
+5. **Tables for Structured Data**: Use tables to organize data that fits into rows and columns for clarity.
+
+6. **Quotes and References**: Use blockquotes for quotes and reference links for sources.
+
+7. **Code Blocks**: Use code blocks for any code snippets or technical instructions.
+
+8. **Images and Diagrams**: Include images or diagrams where applicable to visually represent information.
+
+9. **Linking and Cross-referencing**: Use internal links to connect related notes or sections within your vault.
+
+10. do not use \`\`\` markdown`
     );
   }
 }
@@ -156,7 +254,7 @@ export async function safeRename(
   file: TFile,
   newName: string
 ): Promise<void> {
-  const parentPath = file.parent.path;
+  const parentPath = file.parent?.path ?? '';
   const extension = file.extension;
   const desiredPath = `${parentPath}/${newName}.${extension}`;
 
@@ -191,7 +289,7 @@ export async function safeMove(
  * Sanitizes content to ensure it's valid for Obsidian
  * Handles frontmatter and content separately for safety
  */
-async function sanitizeContent(content: string): Promise<string> {
+export async function sanitizeContent(content: string): Promise<string> {
   try {
     // If content is empty or not a string, return empty string
     if (!content || typeof content !== "string") {
@@ -221,16 +319,8 @@ async function sanitizeContent(content: string): Promise<string> {
       }
 
       if (inFrontmatter) {
-        // Validate frontmatter line
-        try {
-          // Check if line is valid YAML key-value pair
-          const [key, ...valueParts] = line.split(":");
-          if (key && key.trim() && !key.includes(" ")) {
-            validContent.push(line);
-          }
-        } catch (e) {
-          logger.debug("Skipping invalid frontmatter line:", line);
-        }
+        // Keep all frontmatter lines as-is
+        validContent.push(line);
       } else {
         // Regular content - remove null characters and other potentially problematic chars
         const sanitizedLine = line
@@ -273,11 +363,21 @@ export async function safeModifyContent(
       // Valid frontmatter should create 3 parts: ["", yaml content, remaining content]
       if (parts.length >= 3) {
         try {
-          // Only try to parse the YAML part (index 1)
-          parseYaml(parts[1]);
+          // Try to parse the YAML part (index 1) to validate it
+          const frontmatter = parseYaml(parts[1]);
+          
+          // If parsing succeeds, use processFrontMatter to ensure proper handling of arrays
+          await app.fileManager.processFrontMatter(file, (fm) => {
+            // Merge the parsed frontmatter with existing
+            Object.assign(fm, frontmatter);
+          });
+          
+          // Update the content after frontmatter is processed
+          await app.vault.modify(file, sanitizedContent);
+          return;
         } catch (e) {
-          logger.debug("Frontmatter parsing failed, preserving original content");
-          // Instead of stripping frontmatter, preserve the original content
+          logger.debug("Frontmatter parsing failed:", e);
+          // If parsing fails, preserve the original content
           await app.vault.modify(file, sanitizedContent);
           return;
         }

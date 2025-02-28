@@ -24,6 +24,8 @@ import {
   safeMove,
   safeModifyContent as safeModify,
 } from "../fileUtils";
+import { sanitizeContent } from "../fileUtils";
+import { extractYouTubeVideoId, getYouTubeContent, getOriginalContent, YouTubeError } from "./services/youtube-service";
 
 // Move constants to the top level and ensure they're used consistently
 const MAX_CONCURRENT_TASKS = 5;
@@ -300,6 +302,9 @@ export class Inbox {
     inboxFile: TFile,
     hash?: string
   ): Promise<void> {
+    if (!hash) {
+      throw new Error("Hash is required for processing");
+    }
     this.recordManager.setStatus(hash, "processing");
 
     const context: ProcessingContext = {
@@ -347,6 +352,12 @@ export class Inbox {
         cleanupStep,
         Action.CLEANUP,
         Action.ERROR_CLEANUP
+      );
+      await executeStep(
+        context,
+        fetchYouTubeTranscriptStep,
+        Action.FETCH_YOUTUBE,
+        Action.ERROR_FETCH_YOUTUBE
       );
       await executeStep(
         context,
@@ -445,15 +456,22 @@ async function hasValidFileStep(
 async function recommendNameStep(
   context: ProcessingContext
 ): Promise<ProcessingContext> {
+  if (!context.content || !context.containerFile) {
+    logger.info("Skipping name recommendation: missing content or container file");
+    return context;
+  }
+
   const newName = await context.plugin.recommendName(
-    context.content,
+    getOriginalContent(context.content),
     context.containerFile.basename
   );
   context.newName = newName[0]?.title;
+  
   // if new name is the same as the old name then don't rename
-  if (context.newName === context.containerFile.basename) {
+  if (!context.newName || context.newName === context.containerFile.basename) {
     return context;
   }
+  
   context.recordManager.setNewName(context.hash, context.newName);
   await safeRename(context.plugin.app, context.containerFile, context.newName);
   return context;
@@ -471,8 +489,16 @@ async function recommendFolderStep(
     "Container file must exist before moving"
   );
 
+  if (!context.content || !context.containerFile) {
+    logger.info("Skipping folder recommendation: missing content or container file");
+    return context;
+  }
+
+  // Get original content without transcript for folder recommendation
+  const originalContent = getOriginalContent(context.content);
+  
   const newPath = await context.plugin.recommendFolders(
-    context.content,
+    originalContent,
     context.inboxFile.basename
   );
 
@@ -482,10 +508,8 @@ async function recommendFolderStep(
   );
 
   context.newPath = newPath[0]?.folder;
-  console.log("new path", context.newPath, context.containerFile);
   await safeMove(context.plugin.app, context.containerFile, context.newPath);
   context.recordManager.setFolder(context.hash, context.newPath);
-  console.log("moved file to", context.containerFile);
 
   return context;
 }
@@ -502,8 +526,13 @@ async function recommendClassificationStep(
   }
 
   const templateNames = await context.plugin.getTemplateNames();
+  if (!context.content || !context.containerFile) {
+    logger.info("Skipping classification: missing content or container file");
+    return context;
+  }
+
   const result = await context.plugin.classifyContentV2(
-    `${context.content}, ${context.containerFile.name}`,
+    `${getOriginalContent(context.content)}, ${context.containerFile.name}`,
     templateNames
   );
   logger.info("Classification result", result);
@@ -531,9 +560,53 @@ async function getContentStep(
   const fileToRead = context.inboxFile;
   const content = await context.plugin.getTextFromFile(fileToRead);
   context.content = content;
-  await context.plugin.app.vault.modify(context.containerFile, content);
+  if (context.containerFile) {
+    await context.plugin.app.vault.modify(context.containerFile, content);
+  }
   return context;
 }
+
+async function fetchYouTubeTranscriptStep(
+  context: ProcessingContext
+): Promise<ProcessingContext> {
+  try {
+    if (!context.content || !context.containerFile) {
+      logger.info("Skipping YouTube transcript: missing content or container file");
+      return context;
+    }
+
+    const videoId = await extractYouTubeVideoId(context.content);
+    if (!videoId) {
+      return context;
+    }
+
+    const youtubeContent = await getYouTubeContent(videoId);
+    const { title, transcript } = youtubeContent;
+    const appendContent = `\n\n## YouTube Video: ${title}\n\n### Transcript\n\n${transcript}`;
+    
+    await context.plugin.app.vault.modify(
+      context.containerFile,
+      context.content + appendContent
+    );
+    
+    // Update the context content to include the transcript
+    context.content += appendContent;
+    
+    return context;
+  } catch (error) {
+    if (error instanceof YouTubeError) {
+      context.recordManager.addError(context.hash, {
+        action: Action.ERROR_FETCH_YOUTUBE,
+        message: error.message,
+        stack: error.stack,
+      });
+      throw error;
+    }
+    // For other errors, use default error handling
+    throw error;
+  }
+}
+
 
 async function cleanupStep(
   context: ProcessingContext
@@ -544,18 +617,21 @@ async function cleanupStep(
       await handleBypass(context, "No content available");
     }
 
-    // Strip front matter and trim
-    const contentWithoutFrontMatter = context.content
-      .replace(/^---\n[\s\S]*?\n---\n/, "")
-      .trim();
+    if (!context.content) {
+      throw new Error("Content is required for cleanup step");
+    }
 
-    // Bypass if content is too short
-    if (contentWithoutFrontMatter.length < 5) {
+    // Use the sanitizeContent utility which properly preserves frontmatter
+    const sanitizedContent = await sanitizeContent(context.content);
+
+    // Bypass if content is too short (excluding frontmatter)
+    const contentWithoutFrontmatter = sanitizedContent.replace(/^---\n[\s\S]*?\n---\n/, "").trim();
+    if (contentWithoutFrontmatter.length < 5) {
       await handleBypass(context, "Content too short (less than 5 characters)");
     }
 
-    // Set the cleaned content back
-    context.content = contentWithoutFrontMatter;
+    // Set the sanitized content back
+    context.content = sanitizedContent;
     return context;
   } catch (error) {
     logger.error("Error in preprocessContentStep:", error);
@@ -592,6 +668,7 @@ async function formatContentStep(
     logger.info("Skipping formatting: no classification available");
     return context;
   }
+
   // Early return if no classification
   if (!context.classification.documentType) {
     logger.info("Skipping formatting: no classification available");
@@ -636,32 +713,17 @@ async function formatContentStep(
       return context;
     }
 
-    const formattedContent = await context.plugin.formatContentV2(
-      context.content,
-      instructions
-    );
-    context.formattedContent = formattedContent;
+    // Use the Organizer's streamFormatInCurrentNote method for consistent behavior
+    if (!context.containerFile || !context.content) {
+      logger.info("Skipping formatting: missing container file or content");
+      return context;
+    }
 
-    const referenceFile = await safeCopy(
-      context.plugin.app,
-      context.containerFile,
-      context.plugin.settings.referencePath
-    );
-
-    await safeModify(
-      context.plugin.app,
-      context.containerFile,
-      formattedContent
-    );
-
-    const markdownLink = context.plugin.app.fileManager.generateMarkdownLink(
-      referenceFile,
-      context.containerFile.parent.path
-    );
-    await context.plugin.app.vault.append(
-      context.containerFile,
-      `\n\n---\nThis file is formatted and the original file is: ${markdownLink}\n\n---\n\n`
-    );
+    await context.plugin.streamFormatInCurrentNote({
+      file: context.containerFile,
+      content: context.content,
+      formattingInstruction: instructions,
+    });
 
     return context;
   } catch (error) {
@@ -673,6 +735,11 @@ async function recommendTagsStep(
   context: ProcessingContext
 ): Promise<ProcessingContext> {
   const existingTags = await context.plugin.getAllVaultTags();
+  if (!context.content || !context.containerFile) {
+    logger.info("Skipping tag recommendation: missing content or container file");
+    return context;
+  }
+
   const tags = await context.plugin.recommendTags(
     context.content,
     context.containerFile.path,
@@ -680,8 +747,10 @@ async function recommendTagsStep(
   );
   context.tags = tags?.map(t => t.tag);
   // for each tag, append it to the file
-  for (const tag of context.tags) {
-    await context.plugin.appendTag(context.containerFile, tag);
+  if (context.tags && context.containerFile) {
+    for (const tag of context.tags) {
+      await context.plugin.appendTag(context.containerFile, tag);
+    }
   }
   context.recordManager.setTags(context.hash, context.tags);
   return context;
@@ -737,6 +806,10 @@ async function handleError(
     case Action.ERROR_CLASSIFY:
     case Action.ERROR_TAGGING:
       // Handle AI-related errors
+      await moveToBackupFolder(context);
+      break;
+    case Action.ERROR_FETCH_YOUTUBE:
+      // Handle YouTube errors by moving to backup folder
       await moveToBackupFolder(context);
       break;
     default:
