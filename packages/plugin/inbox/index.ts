@@ -8,7 +8,7 @@ import {
   FileStatus,
 } from "./services/record-manager";
 import { QueueStatus } from "./types";
-import { logMessage } from "../someUtils";
+import { logMessage, sanitizeFileName } from "../someUtils";
 import { IdService } from "./services/id-service";
 import { logger } from "../services/logger";
 import {
@@ -353,12 +353,17 @@ export class Inbox {
         Action.CLEANUP,
         Action.ERROR_CLEANUP
       );
-      await executeStep(
-        context,
-        fetchYouTubeTranscriptStep,
-        Action.FETCH_YOUTUBE,
-        Action.ERROR_FETCH_YOUTUBE
-      );
+      
+      // Only process YouTube if content contains a YouTube URL
+      if (await shouldProcessYouTube(context)) {
+        await executeStep(
+          context,
+          fetchYouTubeTranscriptStep,
+          Action.FETCH_YOUTUBE,
+          Action.ERROR_FETCH_YOUTUBE
+        );
+      }
+      
       await executeStep(
         context,
         recommendClassificationStep,
@@ -472,6 +477,10 @@ async function recommendNameStep(
     return context;
   }
   
+  // Sanitize the new name to replace invalid characters with dashes
+  const sanitizedName = sanitizeFileName(context.newName);
+  context.newName = sanitizedName;
+  
   context.recordManager.setNewName(context.hash, context.newName);
   await safeRename(context.plugin.app, context.containerFile, context.newName);
   return context;
@@ -542,6 +551,13 @@ async function recommendClassificationStep(
     confidence: 100,
     reasoning: "N/A",
   };
+  
+  // Set the classification in the record manager
+  context.recordManager.setClassification(context.hash, result);
+  
+  // Explicitly log the completion of classification
+  context.recordManager.completeAction(context.hash, Action.CLASSIFY_DONE);
+  
   return context;
 }
 
@@ -563,6 +579,11 @@ async function getContentStep(
   if (context.containerFile) {
     await context.plugin.app.vault.modify(context.containerFile, content);
   }
+  
+  // Explicitly log the completion of content extraction
+  // This will be used to track audio transcription and image processing
+  context.recordManager.completeAction(context.hash, Action.EXTRACT_DONE);
+  
   return context;
 }
 
@@ -577,6 +598,7 @@ async function fetchYouTubeTranscriptStep(
 
     const videoId = await extractYouTubeVideoId(context.content);
     if (!videoId) {
+      // This should never happen now, but just in case
       return context;
     }
 
@@ -591,6 +613,9 @@ async function fetchYouTubeTranscriptStep(
     
     // Update the context content to include the transcript
     context.content += appendContent;
+    
+    // Explicitly log the completion of YouTube transcript fetching
+    context.recordManager.completeAction(context.hash, Action.FETCH_YOUTUBE_DONE);
     
     return context;
   } catch (error) {
@@ -724,6 +749,10 @@ async function formatContentStep(
       content: context.content,
       formattingInstruction: instructions,
     });
+    
+    // Explicitly log the completion of formatting
+    context.recordManager.completeAction(context.hash, Action.FORMATTING_DONE);
+    context.recordManager.setFormatted(context.hash, true);
 
     return context;
   } catch (error) {
@@ -879,9 +908,32 @@ async function executeStep(
       return context;
     }
 
+    // Log the start of the action
     context.recordManager.addAction(context.hash, action);
+    
+    // Execute the step
     const result = await step(context);
-    context.recordManager.completeAction(context.hash, action);
+    
+    // Log the completion of the action
+    // Check if this is a "DONE" action or needs the corresponding "DONE" action
+    const isDoneAction = action.toString().includes("_DONE");
+    if (!isDoneAction) {
+      // Find the corresponding "DONE" action if it exists
+      const doneActionKey = `${action.toString()}_DONE`;
+      const doneAction = Object.values(Action).find(a => a.toString() === doneActionKey);
+      
+      if (doneAction) {
+        // Log the completion with the corresponding "DONE" action
+        context.recordManager.addAction(context.hash, doneAction, true);
+      } else {
+        // If no corresponding "DONE" action exists, mark the current action as completed
+        context.recordManager.completeAction(context.hash, action);
+      }
+    } else {
+      // If this is already a "DONE" action, mark it as completed
+      context.recordManager.completeAction(context.hash, action);
+    }
+    
     return result;
   } catch (error) {
     context.recordManager.addAction(context.hash, errorAction);
@@ -892,4 +944,12 @@ async function executeStep(
     });
     throw error;
   }
+}
+
+// Add this function to check if content contains a YouTube URL
+async function shouldProcessYouTube(context: ProcessingContext): Promise<boolean> {
+  if (!context.content) return false;
+  
+  const videoId = await extractYouTubeVideoId(context.content);
+  return !!videoId;
 }

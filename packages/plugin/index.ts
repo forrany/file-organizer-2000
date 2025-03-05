@@ -410,7 +410,10 @@ export default class FileOrganizer extends Plugin {
       const bytes = new Uint8Array(arrayBuffer);
       const doc = await pdfjsLib.getDocument({ data: bytes }).promise;
       let text = "";
-      for (let pageNum = 1; pageNum <= Math.min(doc.numPages, 10); pageNum++) {
+      
+      // Use pdfPageLimit to cap the maximum pages read.
+      const pageLimit = Math.min(doc.numPages, this.settings.pdfPageLimit);
+      for (let pageNum = 1; pageNum <= pageLimit; pageNum++) {
         const page = await doc.getPage(pageNum);
         const textContent = await page.getTextContent();
         text += textContent.items.map(item => item.str).join(" ");
@@ -892,14 +895,17 @@ export default class FileOrganizer extends Plugin {
 
     // If view doesn't exist, create it
     if (!view) {
-      await this.app.workspace.getRightLeaf(false).setViewState({
-        type: ORGANIZER_VIEW_TYPE,
-        active: true,
-      });
+      const leaf = this.app.workspace.getRightLeaf(false);
+      if (leaf) {
+        await leaf.setViewState({
+          type: ORGANIZER_VIEW_TYPE,
+          active: true,
+        });
 
-      // Get the newly created view
-      view = this.app.workspace.getLeavesOfType(ORGANIZER_VIEW_TYPE)[0]
-        ?.view as AssistantViewWrapper;
+        // Get the newly created view
+        view = this.app.workspace.getLeavesOfType(ORGANIZER_VIEW_TYPE)[0]
+          ?.view as AssistantViewWrapper;
+      }
     }
 
     // Reveal and focus the leaf
@@ -1120,11 +1126,16 @@ export default class FileOrganizer extends Plugin {
     let leaf = workspace.getLeavesOfType(DASHBOARD_VIEW_TYPE)[0];
     
     if (!leaf) {
-      leaf = workspace.getRightLeaf(false);
-      await leaf.setViewState({
-        type: DASHBOARD_VIEW_TYPE,
-        active: true,
-      });
+      const rightLeaf = workspace.getRightLeaf(false);
+      if (rightLeaf) {
+        leaf = rightLeaf;
+        await leaf.setViewState({
+          type: DASHBOARD_VIEW_TYPE,
+          active: true,
+        });
+      } else {
+        return null;
+      }
     }
     
     workspace.revealLeaf(leaf);
