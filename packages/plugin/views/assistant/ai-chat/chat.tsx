@@ -126,12 +126,19 @@ export const ChatComponent: React.FC<ChatComponentProps> = ({
   }, [contextItems, isLightweightMode]);
   logger.debug("contextString", contextString);
 
+  const [selectedModel, setSelectedModel] = useState<ModelType>(
+    plugin.settings.selectedModel
+  );
+
   const chatBody = {
     currentDatetime: window.moment().format("YYYY-MM-DDTHH:mm:ssZ"),
     enableScreenpipe: plugin.settings.enableScreenpipe,
     newUnifiedContext: contextString,
     model: plugin.settings.selectedModel, // Pass selected model to server
-    enableSearchGrounding: plugin.settings.enableSearchGrounding,
+    enableSearchGrounding: plugin.settings.enableSearchGrounding || 
+                          selectedModel === 'gpt-4o-search-preview' || 
+                          selectedModel === 'gpt-4o-mini-search-preview',
+    deepSearch: plugin.settings.enableDeepSearch,
   };
 
   const [groundingMetadata, setGroundingMetadata] =
@@ -265,11 +272,6 @@ export const ChatComponent: React.FC<ChatComponentProps> = ({
   }, [messages, history]);
 
   const [maxContextSize] = useState(80 * 1000); // Keep this one
-
-  // Update state to default to gpt-4
-  const [selectedModel, setSelectedModel] = useState<ModelType>(
-    plugin.settings.selectedModel
-  );
 
   useEffect(() => {
     // Update selectedModel when plugin settings change

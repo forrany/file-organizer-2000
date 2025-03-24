@@ -48,21 +48,7 @@ export default function RootLayout({
       <body className="bg-background">
         <TooltipProvider>
           <Providers>
-            {/* DAO Announcement Banner */}
-            <div className="w-full bg-primary-100 border-b border-primary-200">
-              <div className="max-w-7xl mx-auto px-6 py-3 text-center">
-                <p className="text-sm text-primary-800">
-                  <span className="font-semibold">Exciting news!</span> We've
-                  become a community-owned organization.
-                  <a
-                    href="/dao"
-                    className="ml-2 font-medium underline hover:text-primary-600"
-                  >
-                    Learn why and how to get involved →
-                  </a>
-                </p>
-              </div>
-            </div>
+
             <main className="min-h-screen flex flex-col items-center">
               <div className="flex-1 w-full flex flex-col items-center">
                 <div className="w-full border-b border-gray-700 bg-background backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -98,7 +84,7 @@ export default function RootLayout({
                           <Star className="h-4 w-4" />
                           <span>530</span>
                         </a>
-                        <Link href="https://app.fileorganizer2000.com">
+                        <Link href="https://accounts.notecompanion.ai/sign-up">
                           <Button
                             variant="default"
                             size="sm"
@@ -113,42 +99,7 @@ export default function RootLayout({
                 </div>
                 <div className="flex flex-col p-5 pb-20 w-full">{children}</div>
 
-                <footer className="w-full flex flex-col items-center justify-center border-t border-gray-700 mx-auto text-center text-xs gap-8 py-8">
-                  <p className="text-sm text-gray-900">
-                    Different AI Inc - Privacy-first AI solutions
-                  </p>
-                  <div className="mt-4 pt-4 border-t border-gray-200 w-full max-w-3xl text-center">
-                    <p className="text-sm text-gray-700">
-                      <strong>Want to shape Note Companion's future?</strong>{" "}
-                      <a
-                        href="https://t.me/notecompanion"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-primary hover:underline"
-                      >
-                        Join our Telegram
-                      </a>
-                      ,{" "}
-                      <a
-                        href="https://www.daos.fun/dao/8iLdHtnZL3aLVRVseT1Rv3cytngqPPoe2hWcouJLd8Gd"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-primary hover:underline"
-                      >
-                        view on daos.fun
-                      </a>
-                      , or{" "}
-                      <a
-                        href="https://x.com/notecompanion"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-primary hover:underline"
-                      >
-                        follow on Twitter
-                      </a>
-                    </p>
-                  </div>
-                </footer>
+               
               </div>
             </main>
             <Toaster />

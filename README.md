@@ -3,7 +3,7 @@
 Note Companion is an AI-powered Obsidian plugin that automatically organizes and formats your notes—so you don’t have to.
 
 <p>
-  <a href="https://fileorganizer2000.com/"><img src="https://img.shields.io/badge/Try-Note%20Companion-7852ee?style=flat&logoColor=white" alt="Try Note Companion"></a>
+  <a href="https://notecompanion.ai/"><img src="https://img.shields.io/badge/Try-Note%20Companion-7852ee?style=flat&logoColor=white" alt="Try Note Companion"></a>
   <a href="https://youtube.com/playlist?list=PLgRcC-DFR5jcwwg0Dr3gNZrkZxkztraKE&si=ZCn2ndFz-zN2cfML"><img src="https://img.shields.io/youtube/channel/subscribers/UCd24YzGlvtIG4DYD3zlYLwg?label=YouTube&color=34d399&style=flat&logo=youtube&logoColor=white" alt="YouTube Subscribers"></a>
 </p>
 
@@ -156,7 +156,7 @@ Auto-organize with the AI Inbox.
 
 We recommend the AI Assistant view for more control. But the AI Inbox can be handy as well. Simply move any of your files to the "Inbox" folder and the plugin will automatically move it to the folder it belongs. Additional configuration can also be specified within the plugin settings (e.g. auto-tagging, auto-formatting).
 
-Move your unorganized files into `_FileOrganizer2000/Inbox`
+Move your unorganized files into `_NoteCompanion/Inbox`
 
 ![image](https://github.com/different-ai/file-organizer-2000/assets/11430621/295038f0-170c-456e-8e0a-e89c31719b95)
 

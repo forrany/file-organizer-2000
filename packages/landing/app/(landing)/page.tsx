@@ -76,13 +76,14 @@ export default function Page() {
           
            Note Companion is an AI-powered Obsidian plugin that improves your workflow by automatically organizing and formatting your notes—so you don't have to.
 
-
-           {/* It gives you automatic organization suggestions,  packs a powerful AI chat, and other wizardry such as audio transcription, meeting notes enhancement, and ai image processing (OCR). */}
           </p>
+          <div className="mt-3 inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-amber-100 text-amber-800">
+            New! Free tier now available
+          </div>
           <div className="mt-10 flex items-center justify-center gap-x-6">
-            <a href="https://app.fileorganizer2000.com">
+            <a href="https://accounts.notecompanion.ai/sign-up">
               <Button size="lg" className="bg-primary text-white hover:bg-primary/90">
-                Start free trial
+                Start for free
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
             </a>
@@ -279,10 +280,10 @@ export default function Page() {
 
 
       {/* Demo Section */}
-      <div className="w-full max-w-[1200px] px-6 py-24 bg-white/5 backdrop-blur-sm">
+      <div className="w-full max-w-[1200px] px-6 py-24 bg-white/5 backdrop-blur-sm hidden lg:block">
         <div className="text-center mb-16">
           <h2 className="text-3xl font-bold tracking-tight sm:text-4xl mb-4">
-            See it in Action
+          What it looks like in your vault
           </h2>
           <p className="text-lg">
             Experience how Note Companion transforms your workflow
@@ -334,9 +335,16 @@ export default function Page() {
             {/* <p className="text-lg text-muted-foreground mb-12">
               Whether you're a solo note-taker or a power user looking for advanced features, we've got you covered.
             </p> */}
-            <div className="bg-[#EBF5FF] border-1 border-[#2E90FA] rounded-lg p-4 mb-12 max-w-3xl mx-auto text-center">
+            {/* <div className="bg-[#EBF5FF] border-1 border-[#2E90FA] rounded-lg p-4 mb-12 max-w-3xl mx-auto text-center">
               <p className="text-[#1570EF]">
                 Educators and students qualify for a 50% discount on the Lifetime plan or a special Monthly rate of $9. To claim this offer, please reach out at alex@fileorganizer2000.com via your education email.
+              </p>
+            </div> */}
+            
+            {/* ScreenPipe Promotion */}
+            <div className="bg-[#EBF5FF] border-1 border-[#2E90FA] rounded-lg p-4 mb-12 max-w-3xl mx-auto text-center">
+            <p className="text-[#1570EF]">
+                <span className="font-bold">Limited Time Offer:</span> All purchases until March 31st include a free copy of <a href="https://screenpi.pe" className="underline font-medium">ScreenPipe</a> (worth $200) — the perfect add-on for enhanced meeting notes!
               </p>
             </div>
           </div>
@@ -348,7 +356,7 @@ export default function Page() {
       <section className="w-full py-24 bg-white/5 backdrop-blur-sm">
         <div className="mx-auto max-w-7xl px-6">
           <h2 className="text-3xl font-bold tracking-tight text-center mb-12">
-            Discover More Features
+          More Stuff You Can Do
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
             <div className="relative aspect-video rounded-lg overflow-hidden">
@@ -378,15 +386,15 @@ export default function Page() {
         <div className="mx-auto max-w-7xl px-6 py-24 sm:py-32 lg:px-8">
           <div className="mx-auto max-w-2xl text-center">
             <h2 className="text-3xl font-bold tracking-tight sm:text-4xl mb-6">
-              Tired of having a messy Obsidian vault?
+            Messy vault?
             </h2>
             <p className="text-lg text-muted-foreground mb-10">
-              Get Note Companion and enjoy a 7-day free trial on the yearly plan. Bring order to your Obsidian vault. Stop wrestling with messy notes and let AI handle the tedious tasks—so you can focus on what really matters.
+            Focus on building knowledge, not managing it. Note Companion maintains your vault organized and amplifies your thinking. Start with our free tier—no credit card required.
             </p>
             <div className="flex items-center justify-center gap-x-6">
-              <a href="https://app.fileorganizer2000.com">
+              <a href="https://accounts.notecompanion.ai/sign-up">
                 <Button size="lg" className="text-white bg-primary hover:bg-primary/90">
-                  Start Free Trial
+                  Get Started Free
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
               </a>

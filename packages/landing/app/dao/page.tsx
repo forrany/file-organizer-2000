@@ -71,6 +71,25 @@ export default function DaoPage() {
         </div>
       </div>
 
+      {/* Product Status Callout */}
+      <div className="w-full bg-primary-50 py-4 border-y border-primary-200">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 text-center sm:text-left">
+            <div className="flex items-center mb-2 sm:mb-0">
+              <CheckCircle2 className="h-5 w-5 text-green-600 mr-2 flex-shrink-0" />
+              <p className="text-gray-800 font-medium">
+                Note Companion is an established product with an active user base
+              </p>
+            </div>
+            <Link href="/" className="sm:ml-2">
+              <span className="text-primary-600 hover:text-primary-700 text-sm font-medium flex items-center transition-colors">
+                Visit Product Homepage
+                <ArrowRight className="ml-1 h-3 w-3" />
+              </span>
+            </Link>
+          </div>
+        </div>
+      </div>
       {/* Key Benefits Section */}
       <div className="w-full py-20 bg-white">
         <div className="max-w-7xl mx-auto px-6">

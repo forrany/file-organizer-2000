@@ -1,4 +1,19 @@
-// import '../styles.css'; // Removed to prevent JS from injecting CSS
+import './styles.css';
+
+// Add Node.js type declarations
+declare namespace NodeJS {
+  interface ProcessEnv {
+    NODE_ENV: 'production' | 'development' | string;
+  }
+}
+declare const process: { env: NodeJS.ProcessEnv };
+declare class Buffer {
+  constructor(arg: ArrayBuffer | string, encoding?: string);
+  toString(encoding?: string): string;
+  slice(start?: number, end?: number): Buffer;
+  byteLength: number;
+  static from(arrayBuffer: ArrayBuffer): Buffer;
+}
 
 import {
   Plugin,
@@ -22,6 +37,7 @@ import { DashboardView, DASHBOARD_VIEW_TYPE } from "./views/assistant/dashboard/
 import Jimp from "jimp/es/index";
 
 import { FileOrganizerSettings, DEFAULT_SETTINGS } from "./settings";
+import { checkAndCreateFolders } from "./fileUtils";
 
 import { registerEventHandlers } from "./handlers/eventHandlers";
 import {
@@ -103,7 +119,7 @@ export default class FileOrganizer extends Plugin {
     // if process env prod then point to prod server if not to localhost
     const serverUrl =
       process.env.NODE_ENV === "production"
-        ? "https://app.fileorganizer2000.com"
+        ? "https://app.notecompanion.ai"
         : this.getServerUrl();
     const premiumStatus = await fetch(`${serverUrl}/api/check-premium`, {
       headers: {
@@ -132,7 +148,7 @@ export default class FileOrganizer extends Plugin {
   getServerUrl(): string {
     let serverUrl = this.settings.enableSelfHosting
       ? this.settings.selfHostingURL
-      : "https://app.fileorganizer2000.com";
+      : "https://app.notecompanion.ai";
 
     // Remove trailing slash (/) at end of url if there is one; prevents errors for /api/chat requests
     serverUrl = serverUrl.replace(/\/$/, "");
@@ -209,6 +225,12 @@ export default class FileOrganizer extends Plugin {
     const backupLink = `\n\n---\n[[${backupFile.path} | Link to original file]]`;
 
     await this.app.vault.append(currentFile, backupLink);
+  }
+
+  async appendFormattedLinkToBackupFile(backupFile: TFile, formattedFile: TFile) {
+    const formattedLink = `\n\n---\n[[${formattedFile.path} | Link to formatted file]]`;
+    
+    await this.app.vault.append(backupFile, formattedLink);
   }
 
   async getFormatInstruction(classification: string): Promise<string> {
@@ -297,6 +319,7 @@ export default class FileOrganizer extends Plugin {
         updateCallback
       );
       this.appendBackupLinkToCurrentFile(file, backupFile);
+      await this.appendFormattedLinkToBackupFile(backupFile, file);
 
       new Notice("Content formatted successfully", 3000);
     } catch (error) {
@@ -389,6 +412,7 @@ export default class FileOrganizer extends Plugin {
 
       // Insert reference to backup
       await this.appendBackupLinkToCurrentFile(file, backupFile);
+      await this.appendFormattedLinkToBackupFile(backupFile, file);
       new Notice("Line-by-line update done!", 3000);
     } catch (error) {
       logger.error("Error formatting content line by line:", error);
@@ -656,7 +680,7 @@ export default class FileOrganizer extends Plugin {
       this.settings.fabricPaths,
       this.settings.pathToWatch,
       this.settings.errorFilePath,
-      "_FileOrganizer2000",
+      "_NoteCompanion",
       "/",
     ];
     logMessage("ignoredFolders", ignoredFolders);
@@ -718,7 +742,12 @@ export default class FileOrganizer extends Plugin {
     if (!this.isWebP(fileContent)) {
       // Compress the image if it's not a WebP
       const resizedImage = await this.compressImage(fileContent);
-      processedArrayBuffer = resizedImage.buffer;
+      // Convert the Buffer to an ArrayBuffer
+      const tempArray = new Uint8Array(resizedImage.byteLength);
+      for (let i = 0; i < resizedImage.byteLength; i++) {
+        tempArray[i] = resizedImage[i];
+      }
+      processedArrayBuffer = tempArray.buffer;
     } else {
       // If it's a WebP, use the original file content directly
       processedArrayBuffer = arrayBuffer;
@@ -1142,5 +1171,33 @@ export default class FileOrganizer extends Plugin {
     return leaf.view as DashboardView;
   }
 
+  // Create all necessary folders for the plugin to function properly
+  public async checkAndCreateRequiredFolders(): Promise<void> {
+    try {
+      // Ensure all required folders exist
+      await checkAndCreateFolders(
+        this.app.vault, 
+        [
+          this.settings.pathToWatch,
+          this.settings.defaultDestinationPath,
+          this.settings.referencePath,
+          this.settings.attachmentsPath,
+          this.settings.logFolderPath,
+          this.settings.backupFolderPath,
+          this.settings.templatePaths,
+          this.settings.fabricPaths,
+          this.settings.bypassedFilePath,
+          this.settings.errorFilePath,
+          this.settings.syncFolderPath,
+        ]
+      );
+      
+      // Show success message
+      new Notice("All required folders have been created successfully!", 3000);
+    } catch (error) {
+      console.error("Failed to create required folders:", error);
+      new Notice("There was an error creating the required folders. Please check console for details.", 5000);
+    }
+  }
   
 }

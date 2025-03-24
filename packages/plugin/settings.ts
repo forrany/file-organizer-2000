@@ -1,17 +1,19 @@
 export class FileOrganizerSettings {
+  
   API_KEY = "";
   isLicenseValid = false;
   useLogs = true;
-  defaultDestinationPath = "_FileOrganizer2000/Processed";
-  referencePath = "_FileOrganizer2000/References";
-  attachmentsPath = "_FileOrganizer2000/Processed/Attachments";
-  pathToWatch = "_FileOrganizer2000/Inbox";
-  logFolderPath = "_FileOrganizer2000/Logs";
-  backupFolderPath = "_FileOrganizer2000/Backups";
-  templatePaths = "_FileOrganizer2000/Templates";
-  fabricPaths = "_FileOrganizer2000/Fabric";
-  bypassedFilePath = "_FileOrganizer2000/Bypassed";
-  errorFilePath = "_FileOrganizer2000/Errors";
+  defaultDestinationPath = "_NoteCompanion/Processed";
+  referencePath = "_NoteCompanion/References";
+  attachmentsPath = "_NoteCompanion/Processed/Attachments";
+  pathToWatch = "_NoteCompanion/Inbox";
+  logFolderPath = "_NoteCompanion/Logs";
+  backupFolderPath = "_NoteCompanion/Backups";
+  templatePaths = "_NoteCompanion/Templates";
+  fabricPaths = "_NoteCompanion/Fabric";
+  bypassedFilePath = "_NoteCompanion/Bypassed";
+  errorFilePath = "_NoteCompanion/Errors";
+  syncFolderPath = "_NoteCompanion/Sync";
 
   // inbox settings
   useSimilarTags = true;
@@ -25,7 +27,7 @@ export class FileOrganizerSettings {
   useSimilarTagsInFrontmatter = false;
   enableAtomicNotes = false;
   ignoreFolders = [""];
-  stagingFolder = ".fileorganizer2000/staging";
+  stagingFolder = ".notecompanion/staging";
   enableSelfHosting = false;
   selfHostingURL = "http://localhost:3000";
   enableScreenpipe = false;
@@ -33,6 +35,7 @@ export class FileOrganizerSettings {
   useFolderEmbeddings = false;
   useVaultTitles = true;
   enableSearchGrounding = false;
+  enableDeepSearch = false;
   showLocalLLMInChat = false;
   customFolderInstructions = "";
   selectedModel: "gpt-4o" | "llama3.2" = "gpt-4o";
