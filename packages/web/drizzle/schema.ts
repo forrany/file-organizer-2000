@@ -105,8 +105,8 @@ export const vercelTokens = pgTable('vercel_tokens', {
   updatedAt: timestamp("updated_at").defaultNow(),
   lastDeployment: timestamp("last_deployment"),
   modelProvider: text("model_provider").default('openai'),
-  modelName: text("model_name").default('gpt-4o'),
-  visionModelName: text("vision_model_name").default('gpt-4o'),
+  modelName: text("model_name").default('gpt-4.1-mini'),
+  visionModelName: text("vision_model_name").default('gpt-4.1-mini'),
   lastApiKeyUpdate: timestamp("last_api_key_update"),
 });
 
@@ -279,8 +279,8 @@ export const checkTokenUsage = async (userId: string) => {
   }
 };
 
-// check if has active subscription
-export const checkUserSubscriptionStatus = async (userId: string) => {
+// Separate subscription check from token check
+export const isSubscriptionActive = async (userId: string): Promise<boolean> => {
   console.log("Checking subscription status for User ID:", userId);
   try {
     const userUsage = await db
@@ -289,36 +289,50 @@ export const checkUserSubscriptionStatus = async (userId: string) => {
       .where(eq(UserUsageTable.userId, userId))
       .limit(1)
       .execute();
-    console.log("User Usage Results for User ID:", userId, userUsage);
     
     if (!userUsage[0]) {
       console.log(`No user record found for ${userId}, will be initialized with free tier`);
       return true; // Return true to allow initialization in ensureUserExists
     }
 
-    // Check for free tier
+    // Free tier is considered active by default
     if (userUsage[0].tier === "free") {
-      console.log(`User ${userId} is on free tier`);
-      // For free tier, check if they have remaining tokens
-      const tokenCheck = await checkTokenUsage(userId);
-      return tokenCheck.remaining > 0;
-    }
-
-    // Check for paid tiers
-    if (
-      userUsage[0].paymentStatus === "paid" ||
-      userUsage[0].paymentStatus === "succeeded" ||
-      userUsage[0].paymentStatus === "free"
-    ) {
       return true;
     }
 
-    return false;
+    // Check for paid tiers - only check payment status
+    return (
+      userUsage[0].paymentStatus === "paid" ||
+      userUsage[0].paymentStatus === "succeeded" ||
+      userUsage[0].paymentStatus === "free"
+    );
   } catch (error) {
     console.error("Error checking subscription status for User ID:", userId);
     console.error(error);
     return false;
   }
+};
+
+// Update checkUserSubscriptionStatus to use the new function and handle token limit separately
+export const checkUserSubscriptionStatus = async (userId: string): Promise<boolean> => {
+  const isActive = await isSubscriptionActive(userId);
+  
+  // For free tier, also check if they have remaining tokens
+  if (isActive) {
+    const userUsage = await db
+      .select()
+      .from(UserUsageTable)
+      .where(eq(UserUsageTable.userId, userId))
+      .limit(1);
+    
+    if (userUsage.length > 0 && userUsage[0].tier === "free") {
+      // For free tier, check remaining tokens
+      const tokenCheck = await checkTokenUsage(userId);
+      return tokenCheck.remaining > 0;
+    }
+  }
+  
+  return isActive;
 };
 
 export async function createOrUpdateUserSubscriptionStatus(
@@ -341,6 +355,20 @@ export async function createOrUpdateUserSubscriptionStatus(
       ? tierConfig[0].maxTokens 
       : DEFAULT_FREE_TIER_TOKENS;
     
+    // Check if this is a tier upgrade from free to paid
+    const existingUser = await db
+      .select()
+      .from(UserUsageTable)
+      .where(eq(UserUsageTable.userId, userId))
+      .limit(1);
+    
+    const isUpgradeFromFree = existingUser.length > 0 && 
+      existingUser[0].tier === "free" && 
+      tier !== "free";
+      
+    // For upgrades, reset token usage to 0
+    const tokenUsage = isUpgradeFromFree ? 0 : (existingUser.length > 0 ? existingUser[0].tokenUsage : 0);
+    
     await db
       .insert(UserUsageTable)
       .values({
@@ -348,7 +376,7 @@ export async function createOrUpdateUserSubscriptionStatus(
         subscriptionStatus,
         paymentStatus,
         billingCycle,
-        tokenUsage: 0,
+        tokenUsage: tokenUsage, // Use the adjusted token usage
         maxTokenUsage: maxTokens,
         tier,
         createdAt: new Date(),
@@ -360,6 +388,7 @@ export async function createOrUpdateUserSubscriptionStatus(
           paymentStatus,
           billingCycle,
           tier,
+          tokenUsage: tokenUsage, // Reset token usage for upgrades
           maxTokenUsage: maxTokens,
         },
       });
@@ -442,14 +471,17 @@ export const uploadedFiles = pgTable(
     id: serial("id").primaryKey(),
     userId: text("user_id").notNull(),
     blobUrl: text("blob_url").notNull(),
-    fileType: text("file_type").notNull(), // "pdf" or "image"
+    r2Key: text("r2_key"),
+    fileType: text("file_type").notNull(),
     originalName: text("original_name").notNull(),
-    status: text("status").notNull().default("pending"), // pending, processing, completed, error
-    textContent: text("text_content"), // extracted text content
-    tokensUsed: integer("tokens_used"), // tokens used for processing
+    status: text("status").notNull().default("pending"),
+    textContent: text("text_content"),
+    tokensUsed: integer("tokens_used"),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at").defaultNow().notNull(),
-    error: text("error"), // error message if processing failed
+    error: text("error"),
+    processType: text("process_type").default("standard-ocr"),
+    generatedImageUrl: text("generated_image_url"),
   }
 );
 

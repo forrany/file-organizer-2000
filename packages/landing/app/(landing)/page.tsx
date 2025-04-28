@@ -10,11 +10,14 @@ import {
   MessageSquare,
   Video,
   Star,
+  ExternalLink,
+  Smartphone,
 } from "lucide-react";
 import { Demo } from "./demo/demo";
 import { PricingCards } from "./components/pricing-cards";
 import { FaqSection } from "./components/faq-section";
 import Image from 'next/image';
+import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "note companion — your ai-powered knowledge partner",
@@ -30,6 +33,8 @@ export const metadata: Metadata = {
 export default function Page() {
   return (
     <main className="flex min-h-screen flex-col items-center bg-background text-gray-700">
+
+
       {/* Name Change Banner */}
       <div className="w-full bg-primary/5 border-b border-transparent bg-transparent ">
         <div className="max-w-7xl mx-auto px-6 py-2 text-center text-sm bg-background">
@@ -330,23 +335,23 @@ export default function Page() {
         <div className="mx-auto max-w-7xl px-6 lg:px-8">
           <div className="mx-auto max-w-4xl text-center">
             <h2 className="text-3xl font-bold tracking-tight sm:text-4xl mb-4">
-              Simple, Flexible Pricing
+              Simple Pricing
             </h2>
             {/* <p className="text-lg text-muted-foreground mb-12">
               Whether you're a solo note-taker or a power user looking for advanced features, we've got you covered.
             </p> */}
-            {/* <div className="bg-[#EBF5FF] border-1 border-[#2E90FA] rounded-lg p-4 mb-12 max-w-3xl mx-auto text-center">
-              <p className="text-[#1570EF]">
-                Educators and students qualify for a 50% discount on the Lifetime plan or a special Monthly rate of $9. To claim this offer, please reach out at alex@fileorganizer2000.com via your education email.
-              </p>
-            </div> */}
-            
-            {/* ScreenPipe Promotion */}
             <div className="bg-[#EBF5FF] border-1 border-[#2E90FA] rounded-lg p-4 mb-12 max-w-3xl mx-auto text-center">
-            <p className="text-[#1570EF]">
-                <span className="font-bold">Limited Time Offer:</span> All purchases until March 31st include a free copy of <a href="https://screenpi.pe" className="underline font-medium">ScreenPipe</a> (worth $200) — the perfect add-on for enhanced meeting notes!
+              <p className="text-[#1570EF]">
+                Educators and students qualify for a special Monthly rate of $9. To claim this offer, please reach out at alex@fileorganizer2000.com via your education email.
               </p>
             </div>
+            
+            {/* ScreenPipe Promotion */}
+            {/* <div className="bg-[#EBF5FF] border-1 border-[#2E90FA] rounded-lg p-4 mb-12 max-w-3xl mx-auto text-center">
+            <p className="text-[#1570EF]">
+                <span className="font-bold">Limited Time Offer:</span> All purchases until March 31st include a free copy of <a href="https://screenpi.pe" className="underline font-medium">ScreenPipe</a> (+ ~$200 worth of credits) — the perfect add-on for enhanced meeting notes!
+              </p>
+            </div> */}
           </div>
           <PricingCards />
         </div>
