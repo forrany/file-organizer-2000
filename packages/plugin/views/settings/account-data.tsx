@@ -34,7 +34,6 @@ export const AccountData: React.FC<AccountDataProps> = ({ plugin, onLicenseKeyCh
         const data = await response.json();
         setIsDevMode(data.environment === 'development');
       } catch (error) {
-        console.log('Error checking environment:', error);
         setIsDevMode(false);
       }
     };

@@ -36,7 +36,6 @@ export default function FolderSelector() {
         });
 
         const { folder } = await response.json();
-        console.log(`Suggested folder for ${filename}: ${folder}`);
         // Handle the suggested folder, e.g., move the file to the folder
       }
     });

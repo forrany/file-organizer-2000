@@ -125,7 +125,6 @@ export class Inbox {
 
   private constructor(plugin: FileOrganizer) {
     this.plugin = plugin;
-    console.log("initializing inbox", plugin.settings, plugin.app);
     this.recordManager = RecordManager.getInstance(plugin.app);
     this.idService = IdService.getInstance();
     this.initializeQueue();
@@ -566,7 +565,6 @@ async function recommendClassificationStep(
 async function startProcessing(
   context: ProcessingContext
 ): Promise<ProcessingContext> {
-  console.log("startProcessing", context);
   return context;
 }
 
