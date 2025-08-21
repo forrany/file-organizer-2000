@@ -258,5 +258,5 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 🔗 Links
 
 - [Website](https://notecompanion.ai)
-- [Documentation](https://notecompanion.ai/docs)
+- [Documentation](https://notecompanion.ai/docs) (redirects to GitHub)
 - [GitHub Issues](https://github.com/different-ai/note-companion/issues)
