@@ -4,22 +4,23 @@ An AI-powered Obsidian plugin that automatically organizes, formats, and enhance
 
 ## 📢 Important Disclosures
 
+### Account & Payment Requirements
+- **Payment required for cloud service**: The plugin requires a paid subscription to use the cloud-hosted service
+- **7-day free trial**: New subscriptions include a 7-day trial period
+- **Self-hosting option available**: You can run your own instance for free (see [Self-Hosting Instructions](#-self-hosting) below)
+- **Account creation**: Using the cloud service requires creating an account at [notecompanion.com](https://notecompanion.com)
+
 ### Network Usage
-This plugin requires an active internet connection and communicates with the following remote services:
-- **Note Companion API Server**: For AI-powered features including file classification, formatting, transcription, and chat
+This plugin communicates with the following remote services:
+- **Note Companion API Server** (cloud service): For AI-powered features including file classification, formatting, transcription, and chat
 - **YouTube API**: For fetching video transcripts when processing YouTube links
 - **GitHub API**: For downloading Fabric prompt templates
-- **AI Provider APIs**: Depending on your configuration (OpenAI, Anthropic, Google, Groq, Ollama, etc.)
-
-### Account & Payment Requirements
-- **Free tier available**: Basic features are available without payment
-- **Account required**: Some features require creating a free account at [notecompanion.com](https://notecompanion.com)
-- **Premium features**: Advanced AI features and higher usage limits require a paid subscription
-- **Usage tracking**: The plugin tracks API usage for billing and rate limiting purposes
+- **AI Provider APIs**: When self-hosting, you'll connect directly to your chosen AI provider (OpenAI, Anthropic, Google, etc.)
 
 ### Privacy & Data Handling
-- Files are processed through our secure API for AI analysis
-- We collect anonymous usage statistics to improve the service
+- **Cloud service**: Files are processed through our secure API for AI analysis
+- **Self-hosted**: All processing happens on your own server, data never leaves your control
+- Usage statistics are collected only for the cloud service to manage billing and rate limits
 - Your vault content remains private and is only processed when you explicitly use plugin features
 - View our full privacy policy at [notecompanion.com/privacy](https://notecompanion.com/privacy)
 
@@ -100,12 +101,62 @@ Marketing website for Note Companion.
 
 ## 🚀 Getting Started
 
-### Prerequisites
+You have two options for using Note Companion:
+
+### Option 1: Cloud Service (Easiest)
+1. Install the plugin from Obsidian Community Plugins
+2. Sign up at [notecompanion.com](https://notecompanion.com)
+3. Start your 7-day free trial
+4. Enter your license key in the plugin settings
+
+### Option 2: Self-Hosting (Free, Technical)
+See the [Self-Hosting section](#-self-hosting) below for detailed instructions.
+
+## 🏠 Self-Hosting
+
+Self-hosting allows you to run Note Companion on your own server for free. You'll only need to provide your own AI API keys.
+
+### Quick Start
+
+1. **Clone and install:**
+```bash
+git clone https://github.com/different-ai/note-companion.git
+cd note-companion
+pnpm install
+```
+
+2. **Configure environment:**
+Create a `.env` file in `packages/web` with:
+```env
+OPENAI_API_KEY=your_api_key_here
+```
+Get your API key from [platform.openai.com](https://platform.openai.com)
+
+3. **Build and start the server:**
+```bash
+cd packages/web
+pnpm build:self-host
+pnpm start
+```
+
+4. **Configure the plugin:**
+- In Obsidian, go to Note Companion settings
+- Enable "Self-hosting mode"
+- Set server URL to `http://localhost:3010`
+- Your plugin is now connected to your local server!
+
+For detailed instructions, troubleshooting, and advanced configuration, see [SELF-HOSTING.md](SELF-HOSTING.md).
+
+### Development Setup
+
+For development and contributing:
+
+#### Prerequisites
 - Node.js 18+
 - pnpm 10.8.1+
 - Git
 
-### Installation
+#### Installation
 
 1. Clone the repository:
 ```bash
