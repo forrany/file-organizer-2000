@@ -372,4 +372,4 @@ The self-hosted version is provided under the MIT License. You're free to modify
 
 ---
 
-**Note**: Self-hosting requires technical knowledge and ongoing maintenance. If you prefer a managed solution, consider our cloud service at [notecompanion.com](https://notecompanion.com).
+**Note**: Self-hosting requires technical knowledge and ongoing maintenance. If you prefer a managed solution, consider our cloud service at [notecompanion.ai](https://notecompanion.ai).

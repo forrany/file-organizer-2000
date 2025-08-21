@@ -14,7 +14,7 @@ Support for open-source development available through website
 
 ## What to do when you get an error
 
-Submit a [new issue with steps to reproduce](https://github.com/different-ai/file-organizer-2000/issues/new/choose)
+Submit a [new issue with steps to reproduce](https://github.com/different-ai/note-companion/issues/new/choose)
 
 You can also enable "debug" mode and add it to your issue attachments. But be careful, this can leak sensitive information double check it.
 <img width="1840" alt="Screenshot 2024-11-12 at 16 59 18" src="https://github.com/user-attachments/assets/5d047bf6-205f-4b98-b67c-df408eef285f">

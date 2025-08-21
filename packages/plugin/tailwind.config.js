@@ -1,5 +1,6 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
+  prefix: 'fo-',
   content: [
     './**/*.{js,jsx,ts,tsx}',
     '!./node_modules/**/*',
@@ -44,5 +45,6 @@ module.exports = {
     // make sure to only use the tailwind classes
     preflight: false,
   },
-  important: true,
+  // Removed important: true to avoid conflicts with other plugins
+  // The fo- prefix should provide sufficient isolation
 }

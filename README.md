@@ -8,7 +8,7 @@ An AI-powered Obsidian plugin that automatically organizes, formats, and enhance
 - **Payment required for cloud service**: The plugin requires a paid subscription to use the cloud-hosted service
 - **7-day free trial**: New subscriptions include a 7-day trial period
 - **Self-hosting option available**: You can run your own instance for free (see [Self-Hosting Instructions](#-self-hosting) below)
-- **Account creation**: Using the cloud service requires creating an account at [notecompanion.com](https://notecompanion.com)
+- **Account creation**: Using the cloud service requires creating an account at [notecompanion.ai](https://notecompanion.ai)
 
 ### Network Usage
 This plugin communicates with the following remote services:
@@ -22,7 +22,7 @@ This plugin communicates with the following remote services:
 - **Self-hosted**: All processing happens on your own server, data never leaves your control
 - Usage statistics are collected only for the cloud service to manage billing and rate limits
 - Your vault content remains private and is only processed when you explicitly use plugin features
-- View our full privacy policy at [notecompanion.com/privacy](https://notecompanion.com/privacy)
+- View our full privacy policy at [notecompanion.ai/privacy](https://notecompanion.ai/privacy)
 
 ## 🏗️ Project Structure
 
@@ -105,7 +105,7 @@ You have two options for using Note Companion:
 
 ### Option 1: Cloud Service (Easiest)
 1. Install the plugin from Obsidian Community Plugins
-2. Sign up at [notecompanion.com](https://notecompanion.com)
+2. Sign up at [notecompanion.ai](https://notecompanion.ai)
 3. Start your 7-day free trial
 4. Enter your license key in the plugin settings
 
@@ -257,6 +257,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 🔗 Links
 
-- [Website](https://notecompanion.com)
-- [Documentation](https://docs.notecompanion.com)
+- [Website](https://notecompanion.ai)
+- [Documentation](https://notecompanion.ai/docs)
 - [GitHub Issues](https://github.com/different-ai/note-companion/issues)

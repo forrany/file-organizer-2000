@@ -1,26 +1,26 @@
-# File Organizer 2000 常见问题解答
+# Note Companion 常见问题解答
 
 ## 激活许可证
 
 常规设置
 许可证配置
 
-File Organizer 许可证密钥：需要激活密钥才能解锁完整功能
+Note Companion 许可证密钥：需要激活密钥才能解锁完整功能
 - 状态指示器显示许可证是否当前已激活
 - "获取许可证"按钮重定向到购买页面
 - 通过网站提供开源开发支持
 
 ## 遇到错误时该怎么办
 
-提交[新问题并附上重现步骤](https://github.com/different-ai/file-organizer-2000/issues/new/choose)
+提交[新问题并附上重现步骤](https://github.com/different-ai/note-companion/issues/new/choose)
 
 您也可以启用"调试"模式并将其添加到问题附件中。但请注意，这可能会泄露敏感信息，请仔细检查。
 
 ## 如何使用 Obsidian Web Clipper 保存网页文章
 
-Obsidian web clipper 与 File Organizer 2000 完美配合，不仅可以轻松自动整理剪藏内容，还能对其进行格式化！
+Obsidian web clipper 与 Note Companion 完美配合，不仅可以轻松自动整理剪藏内容，还能对其进行格式化！
 
-只需安装[网页剪藏器]([url](https://obsidian.md/clipper))并将其配置为将文件保存到 _FileOrganizer2000/Inbox
+只需安装[网页剪藏器]([url](https://obsidian.md/clipper))并将其配置为将文件保存到 _NoteCompanion/Inbox
 
 您还可以将其与"AI 模板"结合使用，使用 AI 自动格式化特定文章。
 

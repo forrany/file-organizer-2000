@@ -13,7 +13,7 @@
 
 ## Что делать при возникновении ошибки
 
-Создайте [новый issue с шагами для воспроизведения](https://github.com/different-ai/file-organizer-2000/issues/new/choose)
+Создайте [новый issue с шагами для воспроизведения](https://github.com/different-ai/note-companion/issues/new/choose)
 
 Вы также можете включить режим "debug" и добавить его к вложениям issue. Но будьте осторожны, это может раскрыть конфиденциальную информацию, перепроверьте её.
 <img width="1840" alt="Screenshot 2024-11-12 at 16 59 18" src="https://github.com/user-attachments/assets/5d047bf6-205f-4b98-b67c-df408eef285f">

@@ -12,7 +12,7 @@ Clé de licence File Organizer : Clé d'activation requise pour débloquer toute
 
 ## Que faire en cas d'erreur
 
-Soumettez un [nouveau problème avec les étapes pour reproduire](https://github.com/different-ai/file-organizer-2000/issues/new/choose)
+Soumettez un [nouveau problème avec les étapes pour reproduire](https://github.com/different-ai/note-companion/issues/new/choose)
 
 Vous pouvez également activer le mode "debug" et l'ajouter à vos pièces jointes. Mais attention, cela peut divulguer des informations sensibles, vérifiez bien.
 
