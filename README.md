@@ -2,6 +2,27 @@
 
 An AI-powered Obsidian plugin that automatically organizes, formats, and enhances your notes with intelligent features.
 
+## 📢 Important Disclosures
+
+### Network Usage
+This plugin requires an active internet connection and communicates with the following remote services:
+- **Note Companion API Server**: For AI-powered features including file classification, formatting, transcription, and chat
+- **YouTube API**: For fetching video transcripts when processing YouTube links
+- **GitHub API**: For downloading Fabric prompt templates
+- **AI Provider APIs**: Depending on your configuration (OpenAI, Anthropic, Google, Groq, Ollama, etc.)
+
+### Account & Payment Requirements
+- **Free tier available**: Basic features are available without payment
+- **Account required**: Some features require creating a free account at [notecompanion.com](https://notecompanion.com)
+- **Premium features**: Advanced AI features and higher usage limits require a paid subscription
+- **Usage tracking**: The plugin tracks API usage for billing and rate limiting purposes
+
+### Privacy & Data Handling
+- Files are processed through our secure API for AI analysis
+- We collect anonymous usage statistics to improve the service
+- Your vault content remains private and is only processed when you explicitly use plugin features
+- View our full privacy policy at [notecompanion.com/privacy](https://notecompanion.com/privacy)
+
 ## 🏗️ Project Structure
 
 This is a monorepo project managed with pnpm workspaces and Turborepo. The project consists of several packages:
@@ -181,7 +202,7 @@ pnpm --filter plugin build
 
 ## 📄 License
 
-[License information to be added]
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ## 🔗 Links
 
