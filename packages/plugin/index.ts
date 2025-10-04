@@ -516,6 +516,15 @@ export default class FileOrganizer extends Plugin {
     audioBuffer: ArrayBuffer,
     fileExtension: string
   ): Promise<Response> {
+    const fileSizeInMB = audioBuffer.byteLength / (1024 * 1024);
+    const PRESIGNED_URL_THRESHOLD_MB = 4; // Use pre-signed URL for files > 4MB to avoid Vercel limits
+    
+    // For larger files, use pre-signed URL upload to bypass Vercel body size limit
+    if (fileSizeInMB > PRESIGNED_URL_THRESHOLD_MB) {
+      return this.transcribeAudioViaPresignedUrl(audioBuffer, fileExtension);
+    }
+    
+    // For smaller files, use direct form data upload
     const formData = new FormData();
     const blob = new Blob([audioBuffer], { type: `audio/${fileExtension}` });
     formData.append("audio", blob, `audio.${fileExtension}`);
@@ -527,11 +536,78 @@ export default class FileOrganizer extends Plugin {
         Authorization: `Bearer ${this.settings.API_KEY}`,
       },
     });
+    
     if (!response.ok) {
       const errorData = await response.json();
       throw new Error(`Transcription failed: ${errorData.error}`);
     }
     return response;
+  }
+
+  async transcribeAudioViaPresignedUrl(
+    audioBuffer: ArrayBuffer,
+    fileExtension: string
+  ): Promise<Response> {
+    const fileName = `audio-${Date.now()}.${fileExtension}`;
+    const mimeType = `audio/${fileExtension}`;
+    
+    // Step 1: Get pre-signed URL from backend
+    const presignedResponse = await fetch(`${this.getServerUrl()}/api/create-upload-url`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${this.settings.API_KEY}`,
+      },
+      body: JSON.stringify({
+        filename: fileName,
+        contentType: mimeType,
+      }),
+    });
+
+    if (!presignedResponse.ok) {
+      const errorData = await presignedResponse.json();
+      throw new Error(`Failed to get upload URL: ${errorData.error}`);
+    }
+
+    const { uploadUrl, key, publicUrl } = await presignedResponse.json();
+
+    if (!uploadUrl || !key || !publicUrl) {
+      throw new Error("Invalid response from create-upload-url endpoint");
+    }
+
+    // Step 2: Upload directly to R2 using the pre-signed URL
+    const uploadResponse = await fetch(uploadUrl, {
+      method: "PUT",
+      body: audioBuffer,
+      headers: {
+        "Content-Type": mimeType,
+      },
+    });
+
+    if (!uploadResponse.ok) {
+      throw new Error(`Failed to upload to R2: ${uploadResponse.status}`);
+    }
+
+    // Step 3: Trigger transcription with the uploaded file URL
+    const transcribeResponse = await fetch(`${this.getServerUrl()}/api/transcribe`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${this.settings.API_KEY}`,
+      },
+      body: JSON.stringify({
+        fileUrl: publicUrl,
+        key: key,
+        extension: fileExtension,
+      }),
+    });
+
+    if (!transcribeResponse.ok) {
+      const errorData = await transcribeResponse.json();
+      throw new Error(`Transcription failed: ${errorData.error}`);
+    }
+
+    return transcribeResponse;
   }
 
   async generateTranscriptFromAudio(

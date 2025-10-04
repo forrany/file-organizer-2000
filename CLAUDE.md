@@ -64,3 +64,45 @@ If you encounter style conflicts:
 2. Verify all classNames use the `tw()` function
 3. Inspect the rendered HTML to see if classes have the `fo-` prefix
 4. Add more specific reset styles to the `.fo-container` class in styles.css if needed
+
+## Audio Transcription
+
+### File Size Handling
+
+The audio transcription feature uses a two-tier approach to handle files of different sizes:
+
+1. **Small Files (< 4MB)**: Direct upload via multipart/form-data
+   - Fastest method for smaller audio files
+   - Direct to transcription API endpoint
+   
+2. **Large Files (4MB - 25MB)**: Pre-signed URL upload to R2
+   - Bypasses Vercel's 4.5MB body size limit
+   - Plugin gets a pre-signed URL from `/api/create-upload-url`
+   - Uploads directly to R2 cloud storage
+   - Backend downloads from R2 and transcribes
+   - Reuses existing R2 infrastructure from file upload flow
+
+3. **Files > 25MB**: Error message
+   - OpenAI Whisper API has a hard 25MB limit
+   - Users are instructed to compress or split audio
+
+### Implementation Details
+
+**Plugin-side** (`packages/plugin/index.ts`):
+- `transcribeAudio()` (line ~515): Routes to appropriate upload method based on file size
+- `transcribeAudioViaPresignedUrl()` (line ~547): Handles large file upload via R2
+
+**Server-side**:
+- `packages/web/app/api/(newai)/transcribe/route.ts`: 
+  - Handles both direct uploads and pre-signed URL flow
+  - `handlePresignedUrlTranscription()`: Downloads from R2 and transcribes
+- `packages/web/app/api/create-upload-url/route.ts`: 
+  - Generates pre-signed S3/R2 URLs (shared with file upload flow)
+
+### Benefits of Pre-signed URL Approach
+
+- ✅ No Vercel body size limitations (bypasses API gateway)
+- ✅ Reuses existing R2 infrastructure
+- ✅ Scalable to larger files (up to 25MB OpenAI limit)
+- ✅ Better memory usage (streaming from R2)
+- ✅ Same pattern as mobile app file uploads
