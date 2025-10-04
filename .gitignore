@@ -29,6 +29,7 @@ data.json
 **/.turbo/
 .vercel
 .env*.local
+**/.envback
 
 # Expo native directories
 /android/
