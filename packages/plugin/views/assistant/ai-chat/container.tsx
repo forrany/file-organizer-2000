@@ -40,11 +40,11 @@ const AIChatSidebar: React.FC<AIChatSidebarProps> = ({ plugin, apiKey }) => {
   }, [conversations]); // Include conversations in dependencies since startNewConversation uses it
 
   return (
-    <Card className="flex flex-col h-full max-h-screen bg-[--ai-chat-background] text-[--ai-chat-text] p-0 m-0">
-      <div className="flex justify-end">
+    <div className="flex flex-col h-full bg-[--background-primary]">
+      <div className="relative flex-none h-10 bg-[--background-primary]">
         <Button
           onClick={startNewConversation}
-          className="h-6 w-6 p-1 rounded-full bg-[--interactive-accent] text-[--text-on-accent] hover:bg-[--interactive-accent-hover] transition-colors duration-200 absolute top-2 right-2"
+          className="h-6 w-6 p-1 rounded-full bg-[--interactive-accent] text-[--text-on-accent] hover:bg-[--interactive-accent-hover] transition-colors duration-200 absolute top-2 right-2 z-10"
           aria-label="New Conversation"
         >
           <svg
@@ -63,13 +63,15 @@ const AIChatSidebar: React.FC<AIChatSidebarProps> = ({ plugin, apiKey }) => {
           </svg>
         </Button>
       </div>
-      <ChatComponent
-        key={currentConversationIndex}
-        plugin={plugin}
-        apiKey={apiKey}
-        inputRef={inputRef}
-      />
-    </Card>
+      <div className="flex-1 min-h-0 flex flex-col">
+        <ChatComponent
+          key={currentConversationIndex}
+          plugin={plugin}
+          apiKey={apiKey}
+          inputRef={inputRef}
+        />
+      </div>
+    </div>
   );
 };
 

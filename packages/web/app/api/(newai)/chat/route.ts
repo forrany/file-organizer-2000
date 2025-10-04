@@ -47,7 +47,7 @@ export async function POST(req: NextRequest) {
           console.log(`Using model for search: ${chosenModelName}`);
 
           const result = await streamText({
-            model: openai.responses("gpt-4o-mini"),
+            model: openai.responses("gpt-5-mini"),
             system: getChatSystemPrompt(
               contextString,
               currentDatetime

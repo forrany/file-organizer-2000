@@ -6,8 +6,10 @@ To avoid styling conflicts between Obsidian's styles and our plugin, follow thes
 
 ### 1. Tailwind Configuration
 
-- The Tailwind configuration has been updated to add the `fo-` prefix to all Tailwind classes.
-- This ensures our styles don't conflict with Obsidian's built-in styles.
+- Tailwind is configured with custom Obsidian CSS variables
+- Preflight is disabled to avoid conflicts with Obsidian's global styles
+- Component isolation is achieved through `StyledContainer` wrapper
+- **No prefix needed** - we removed the `fo-` prefix to allow JIT compilation to work properly
 
 ### 2. Component Style Isolation
 
@@ -27,7 +29,7 @@ return (
 );
 ```
 
-3. Use the `tw()` function for class names to ensure proper prefixing:
+3. Use the `tw()` function (alias for `cn()`) for class names with proper merging:
 ```tsx
 import { tw } from "../../lib/utils";
 
@@ -38,9 +40,9 @@ import { tw } from "../../lib/utils";
 </div>
 ```
 
-4. For conditional classes, combine `tw()` with string interpolation:
+4. For conditional classes, use `tw()` with multiple arguments:
 ```tsx
-<div className={tw(`bg-white rounded-lg ${isActive ? "border-blue-500" : "border-gray-200"}`)}>
+<div className={tw("bg-white rounded-lg", isActive && "border-blue-500")}>
   {/* content */}
 </div>
 ```
@@ -62,8 +64,9 @@ If you encounter style conflicts:
 
 1. Check if the component is wrapped in a `StyledContainer`
 2. Verify all classNames use the `tw()` function
-3. Inspect the rendered HTML to see if classes have the `fo-` prefix
+3. Ensure no hardcoded CSS class names are being added (like `card` or `chat-component`)
 4. Add more specific reset styles to the `.fo-container` class in styles.css if needed
+5. Use browser dev tools to check if Tailwind classes are being applied
 
 ## Audio Transcription
 

@@ -53,19 +53,19 @@ async function downloadFromR2(key: string): Promise<Buffer> {
   }
 }
 
-// Helper function to process image with gpt-4o
+// Helper function to process image with gpt-5
 async function processImageWithGPT4one(
   imageUrl: string
 ): Promise<{ textContent: string; tokensUsed: number }> {
   // Keep the existing implementation from process-file/route.ts (or the improved one from process-pending-uploads if different)
   try {
-    console.log("Processing image with gpt-4o..."); // Use gpt-4o consistently
+    console.log("Processing image with gpt-5..."); // Use gpt-5 consistently
     const { getModel } = await import("@/lib/models");
-    const model = getModel("gpt-4o");
+    const model = getModel("gpt-5");
     
     console.log(`Processing image URL: ${imageUrl}`); // Log the URL being sent
     const { object, usage } = await generateObject({
-      //   model: openai("gpt-4.1"), // Ensure this uses gpt-4o if intended
+      //   model: openai("gpt-4.1"), // Ensure this uses gpt-5 if intended
       model,
       schema: z.object({ markdown: z.string() }),
       messages: [
@@ -79,21 +79,21 @@ async function processImageWithGPT4one(
     const textContent = object.markdown || "";
     const tokensUsed = usage?.totalTokens ?? Math.ceil(textContent.length / 4);
     console.log(
-      `gpt-4o extracted ${textContent.length} chars, used approx ${tokensUsed} tokens`
+      `gpt-5 extracted ${textContent.length} chars, used approx ${tokensUsed} tokens`
     );
     return { textContent, tokensUsed };
   } catch (error) {
-    console.error("Error processing image with gpt-4o:", error);
+    console.error("Error processing image with gpt-5:", error);
     // Check if it's an API error with details
     if (error && typeof error === "object" && "message" in error) {
       // Potentially extract more specific error details if available from the SDK error object
       return {
-        textContent: `Error processing image with gpt-4o: ${error.message}`,
+        textContent: `Error processing image with gpt-5: ${error.message}`,
         tokensUsed: 0,
       };
     }
     return {
-      textContent: `Error processing image with gpt-4o: ${String(error)}`,
+      textContent: `Error processing image with gpt-5: ${String(error)}`,
       tokensUsed: 0,
     };
   }
@@ -150,9 +150,9 @@ async function processSingleFileRecord(fileRecord: UploadedFile): Promise<{
       textContent = "[PDF Content - Processing Pending Implementation]";
       tokensUsed = 0;
     } else if (fileType.startsWith("image/")) {
-      // We pass the public blobUrl directly to GPT-4o
+      // We pass the public blobUrl directly to gpt-5
       console.log(
-        `Processing Image (${fileId}) using GPT-4o with URL: ${fileRecord.blobUrl}`
+        `Processing Image (${fileId}) using gpt-5 with URL: ${fileRecord.blobUrl}`
       );
       if (!fileRecord.blobUrl) {
         throw new Error(`Missing blobUrl for image file ID ${fileId}`);

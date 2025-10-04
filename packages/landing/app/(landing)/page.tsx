@@ -229,7 +229,7 @@ export default function Page() {
                 Powerful AI Chat
               </h2>
               <p className="text-muted-foreground">
-                Allowing you to summarize youtube videos, search the web, or manage your vault with the latest GPT-4o model.
+                Allowing you to summarize youtube videos, search the web, or manage your vault with the latest gpt-5 model.
               </p>
             </div>
           </div>

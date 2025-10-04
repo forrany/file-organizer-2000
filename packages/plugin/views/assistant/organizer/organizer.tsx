@@ -16,6 +16,7 @@ import { logMessage } from "../../../someUtils";
 import { LicenseValidator } from "./components/license-validator";
 import { VALID_MEDIA_EXTENSIONS } from "../../../constants";
 import { logger } from "../../../services/logger";
+import { tw } from "../../../lib/utils";
 
 interface AssistantViewProps {
   plugin: FileOrganizer;
@@ -136,8 +137,8 @@ export const AssistantView: React.FC<AssistantViewProps> = ({
   // Then check license
   if (!isLicenseValid) {
     return (
-      <div className="flex flex-col gap-4">
-        <div className="flex gap-3 items-center">
+      <div className={tw("flex flex-col gap-4")}>
+        <div className={tw("flex gap-3 items-center")}>
           <RefreshButton onRefresh={refreshContext} />
         </div>
         <LicenseValidator
@@ -151,8 +152,8 @@ export const AssistantView: React.FC<AssistantViewProps> = ({
 
   if (error) {
     return (
-      <div className="flex flex-col gap-4">
-        <div className="flex gap-3 items-center">
+      <div className={tw("flex flex-col gap-4")}>
+        <div className={tw("flex gap-3 items-center")}>
           <RefreshButton onRefresh={refreshContext} />
         </div>
         <EmptyState
@@ -166,8 +167,8 @@ export const AssistantView: React.FC<AssistantViewProps> = ({
 
   if (!activeFile) {
     return (
-      <div className="flex flex-col gap-4">
-        <div className="flex gap-3 items-center">
+      <div className={tw("flex flex-col gap-4")}>
+        <div className={tw("flex gap-3 items-center")}>
           <RefreshButton onRefresh={refreshContext} />
         </div>
         <EmptyState message="Open a file " />
@@ -177,8 +178,8 @@ export const AssistantView: React.FC<AssistantViewProps> = ({
   
   if (isInIgnoredPatterns) {
     return (
-      <div className="flex flex-col gap-4">
-        <div className="flex gap-3 items-center">
+      <div className={tw("flex flex-col gap-4")}>
+        <div className={tw("flex gap-3 items-center")}>
           <RefreshButton onRefresh={refreshContext} />
         </div>
         <EmptyState message="This file is part of an ignored folder and will not be processed." />
@@ -188,8 +189,8 @@ export const AssistantView: React.FC<AssistantViewProps> = ({
 
   if (isMediaFile) {
     return (
-      <div className="flex flex-col gap-4">
-        <div className="flex gap-3 items-center">
+      <div className={tw("flex flex-col gap-4")}>
+        <div className={tw("flex gap-3 items-center")}>
           <RefreshButton onRefresh={refreshContext} />
         </div>
         <EmptyState message="To process an image or audio file, move it to the Note Companion Inbox Folder (e.g. for image text extraction or audio transcription)." />
@@ -199,8 +200,8 @@ export const AssistantView: React.FC<AssistantViewProps> = ({
   
   if (!noteContent.trim()) {
     return (
-      <div className="flex flex-col gap-4">
-        <div className="flex gap-3 items-center">
+      <div className={tw("flex flex-col gap-4")}>
+        <div className={tw("flex gap-3 items-center")}>
           <RefreshButton onRefresh={refreshContext} />
         </div>
         <EmptyState
@@ -215,10 +216,10 @@ export const AssistantView: React.FC<AssistantViewProps> = ({
   }
 
   return (
-    <div className="flex flex-col gap-4">
-      <div className="flex gap-3 items-center ">
+    <div className={tw("flex flex-col gap-4")}>
+      <div className={tw("flex gap-3 items-center")}>
         <RefreshButton onRefresh={refreshContext} />
-        <div className="text-accent">{activeFile.basename}</div>
+        <div className={tw("text-accent")}>{activeFile.basename}</div>
       </div>
 
       {renderSection(

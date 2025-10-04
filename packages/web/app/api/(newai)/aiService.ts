@@ -227,7 +227,7 @@ export async function extractTextFromImage(
   ];
 
   switch (modelName) {
-    case "gpt-4o": {
+    case "gpt-5": {
       const response = await generateText({
         model,
         //@ts-ignore

@@ -188,14 +188,14 @@
           "type": "text",
           "primaryKey": false,
           "notNull": false,
-          "default": "'gpt-4o'"
+          "default": "'gpt-5'"
         },
         "vision_model_name": {
           "name": "vision_model_name",
           "type": "text",
           "primaryKey": false,
           "notNull": false,
-          "default": "'gpt-4o'"
+          "default": "'gpt-5'"
         },
         "last_api_key_update": {
           "name": "last_api_key_update",

@@ -59,7 +59,7 @@ async function downloadFromR2(key: string): Promise<Buffer> {
   }
 }
 
-// Helper function to process image with gpt-4o
+// Helper function to process image with gpt-5
 async function processImageWithGPT4one(
   imageUrl: string
 ): Promise<{ textContent: string; tokensUsed: number }> {

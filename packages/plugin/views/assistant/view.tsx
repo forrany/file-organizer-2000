@@ -61,9 +61,9 @@ function TabContent({
   }
 
   return (
-    <div className="relative h-full">
+    <div className="flex flex-col h-full">
       <div
-        className={`absolute inset-0 ${
+        className={`flex-1 min-h-0 ${
           activeTab === "organizer" ? "block" : "hidden"
         }`}
       >
@@ -71,7 +71,7 @@ function TabContent({
       </div>
 
       <div
-        className={`absolute inset-0 ${
+        className={`flex-1 min-h-0 flex flex-col ${
           activeTab === "inbox" ? "block" : "hidden"
         }`}
       >
@@ -80,8 +80,8 @@ function TabContent({
       </div>
 
       <div
-        className={`absolute inset-0 ${
-          activeTab === "chat" ? "block" : "hidden"
+        className={`flex-1 min-h-0 ${
+          activeTab === "chat" ? "flex" : "hidden"
         }`}
       >
         <AIChatSidebar plugin={plugin} apiKey={plugin.settings.API_KEY} />
@@ -89,7 +89,7 @@ function TabContent({
 
 
       <div
-        className={`absolute inset-0 ${
+        className={`flex-1 min-h-0 ${
           activeTab === "sync" ? "block" : "hidden"
         }`}
       >
@@ -143,8 +143,8 @@ function AssistantContent({
   }, [onTabChange]);
 
   return (
-    <div className="flex flex-col h-full ">
-      <div className="flex  shadow-none w-fit space-x-2">
+    <div className="flex flex-col h-full">
+      <div className="flex shadow-none w-fit space-x-2 bg-[--background-primary] p-2">
         <TabButton
           isActive={activeTab === "organizer"}
           onClick={() => setActiveTab("organizer")}
@@ -171,7 +171,7 @@ function AssistantContent({
         </TabButton>
       </div>
 
-      <div className="pt-4 h-full">
+      <div className="flex-1 min-h-0">
         <TabContent activeTab={activeTab} plugin={plugin} leaf={leaf} />
       </div>
     </div>

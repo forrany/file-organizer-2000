@@ -136,8 +136,8 @@ export const ChatComponent: React.FC<ChatComponentProps> = ({
     newUnifiedContext: contextString,
     model: plugin.settings.selectedModel, // Pass selected model to server
     enableSearchGrounding: plugin.settings.enableSearchGrounding || 
-                          selectedModel === 'gpt-4o-search-preview' || 
-                          selectedModel === 'gpt-4o-mini-search-preview',
+                          selectedModel === 'gpt-5-search-preview' || 
+                          selectedModel === 'gpt-5-mini-search-preview',
     deepSearch: plugin.settings.enableDeepSearch,
   };
 
@@ -173,7 +173,7 @@ export const ChatComponent: React.FC<ChatComponentProps> = ({
       // Handle different model types
       if (
         !plugin.settings.showLocalLLMInChat ||
-        selectedModel === "gpt-4o"
+        selectedModel === "gpt-5"
       ) {
         // Use server fetch for non-local models
         return fetch(url, options);
@@ -312,14 +312,14 @@ export const ChatComponent: React.FC<ChatComponentProps> = ({
   return (
     <div className="flex flex-col h-full">
       {/* Chat Header */}
-      <div className="border-b border-[--background-modifier-border] p-4">
+      <div className="flex-none border-b border-[--background-modifier-border] p-4 bg-[--background-primary]">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3">
-            <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
+            <div className="h-10 w-10 rounded-full bg-[--background-secondary] flex items-center justify-center">
               <span role="img" aria-label="ai" className="text-lg">🤖</span>
             </div>
             <div>
-              <h2 className="text-lg font-medium">AI Assistant</h2>
+              <h2 className="text-lg font-medium text-[--text-normal]">AI Assistant</h2>
               <p className="text-sm text-[--text-muted] flex items-center gap-2">
                 {isGenerating ? (
                   <>
@@ -345,7 +345,7 @@ export const ChatComponent: React.FC<ChatComponentProps> = ({
       </div>
 
       {/* Chat Messages */}
-      <div className="flex-grow overflow-y-auto p-4">
+      <div className="flex-1 overflow-y-auto p-4 bg-[--background-primary]">
         <div className="flex flex-col space-y-4">
           {errorMessage && (
             <div className="bg-[--background-secondary] border border-[--background-modifier-border] rounded-lg p-4 mb-4">
@@ -357,6 +357,7 @@ export const ChatComponent: React.FC<ChatComponentProps> = ({
                   <h4 className="text-sm font-medium text-[--text-normal] mb-1">Unable to process request</h4>
                   <p className="text-sm text-[--text-muted]">{errorMessage}</p>
                 </div>
+                
                 <Button
                   onClick={handleRetry}
                   variant="ghost"
@@ -371,8 +372,6 @@ export const ChatComponent: React.FC<ChatComponentProps> = ({
 
           {messages.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-12">
-              <h3 className="text-[--text-normal] mb-4 text-lg font-medium">Try these examples</h3>
-              <ExamplePrompts onExampleClick={handleExampleClick} />
             </div>
           ) : (
             messages.map(message => (
@@ -431,7 +430,7 @@ export const ChatComponent: React.FC<ChatComponentProps> = ({
       </div>
 
       {/* Chat Input Section */}
-      <div className="border-t border-[--background-modifier-border] p-4">
+      <div className="flex-none border-t border-[--background-modifier-border] p-4 bg-[--background-primary]">
         <div className="flex items-center space-x-2 mb-4">
           <ContextItems />
           <ClearAllButton />
