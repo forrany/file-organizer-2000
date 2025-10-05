@@ -21,8 +21,8 @@ export default async function MainPage() {
     "subscription",
   ].includes(billingCycle);
 
-  // top-up is not a "PAY ONCE" plan
-  const isPayOnce = ["pay-once", "lifetime"].includes(billingCycle);
+  // top-up is not a subscription plan
+  const isPayOnce = ["pay-once"].includes(billingCycle);
 
   // Check if the user has any kind of active subscription
   const hasSubscription = isSubscription || isPayOnce;

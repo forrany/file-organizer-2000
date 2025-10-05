@@ -55,14 +55,6 @@ export function FaqSection() {
             answer={`<strong>Cloud Service</strong>
 • With a subscription, you get access to GPT-4.1-mini model. It's the best all-around model for performance.
 
-<strong>Lifetime Access</strong>
-• GPT-4.1-mini configured by default
-• Option to setup other openAI compatible models:
-  - Anthropic
-  - Gemini
-  - Groq
-
-
 <strong>Self-Hosted Option</strong>
 • Use any local model of your choice
 • Currently supports Ollama local models

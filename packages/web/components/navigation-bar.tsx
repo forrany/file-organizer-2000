@@ -29,7 +29,7 @@ export interface NavigationItem {
   icon: React.ReactNode;
   badge?: string;
   current?: boolean;
-  requiresSubscription?: 'lifetime' | 'cloud' | boolean;
+  requiresSubscription?: 'cloud' | boolean;
 }
 
 export function NavigationBar() {
@@ -80,18 +80,7 @@ export function NavigationBar() {
   
   // Only add conditional navigation items if we're mounted and user is loaded
   if (mounted && isLoaded && user) {
-    // Conditional navigation items based on subscription type
-    if (userSubscription.currentProduct === 'lifetime') {
-      navigation.push({
-        name: 'Self-Hosting',
-        href: '/dashboard/lifetime',
-        icon: <Server className="h-5 w-5" />,
-        current: pathname?.includes('/dashboard/lifetime'),
-        requiresSubscription: 'lifetime'
-      });
-    }
-    
-    // Add API Keys for any subscriber (lifetime or cloud)
+    // Add API Keys for any subscriber
     if (userSubscription.active) {
       navigation.push({
         name: 'API Keys',

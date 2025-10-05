@@ -52,7 +52,7 @@ export const CatalystGate: React.FC<CatalystGateProps> = ({
           </h3>
           <p className="text-[--text-muted] mb-4">
             Experimental features are available exclusively for Catalyst
-            members. Upgrade to lifetime access to unlock:
+            members. Upgrade to unlock:
           </p>
           <ul className="text-left text-[--text-muted] mb-4 space-y-2">
             <li>• Local LLM Integration</li>

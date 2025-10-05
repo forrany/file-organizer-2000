@@ -26,7 +26,7 @@ export type CustomerData = {
   customerId: string;
   status: string;
   paymentStatus: string;
-  billingCycle?: "monthly" | "lifetime" | "yearly";
+  billingCycle?: "monthly" | "yearly" | "subscription" | "top-up";
   product: string;
   plan: string;
   lastPayment: Date;

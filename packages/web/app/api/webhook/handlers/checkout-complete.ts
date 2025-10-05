@@ -132,15 +132,6 @@ export const handleCheckoutComplete = createWebhookHandler(async (event) => {
       session as Stripe.Checkout.Session & { metadata: ProductMetadata }
     );
   }
-  // either pay once year or pay once lifetime
-  if (
-    session.metadata?.plan === config.products.PayOnceOneYear.metadata.plan ||
-    session.metadata?.plan === config.products.PayOnceLifetime.metadata.plan
-  ) {
-    await handlePayOnce(
-      session as Stripe.Checkout.Session & { metadata: ProductMetadata }
-    );
-  }
   // pay once top up
   if (session.metadata?.plan === config.products.PayOnceTopUp.metadata.plan) {
     console.log("handling top-up", session.metadata);

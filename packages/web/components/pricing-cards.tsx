@@ -89,7 +89,7 @@ export function PricingCards({ onSubscriptionComplete }: PricingCardsProps) {
                   /{price.interval}
                   {isYearly && (
                     <div className="text-xs text-violet-600 font-semibold mt-1">
-                      Save ~33% with yearly billing
+                      Save 33% with yearly billing
                     </div>
                   )}
                 </span>

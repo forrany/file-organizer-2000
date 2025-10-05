@@ -55,8 +55,6 @@ export const PRICES = {
   MONTHLY: 1500, // $15.00
   YEARLY: 11900, // $119.00
   TOP_UP: 1500, // $15.00
-  ONE_YEAR: 20000, // $200.00
-  LIFETIME: 30000, // $300.00
 } as const;
 
 // Features by plan type
@@ -70,16 +68,7 @@ const cloudFeatures = [
   "30 days money-back guarantee",
 ];
 
-const standardPayOnceFeatures = [
-  "Requires your own openAI api key (pay as you go)",
-  "Privacy-focused",
-  "Quick guided setup",
-  "Unlimited usage",
-  "Early access features",
-  "Premium support",
-  "Onboarding call with one of the founders (on request)",
-  "30 days money-back guarantee",
-];
+
 
 // Product metadata configuration
 export const PRODUCTS = {
@@ -96,6 +85,7 @@ export const PRODUCTS = {
         amount: PRICES.MONTHLY,
         interval: "month" as const,
         type: "recurring" as const,
+        trialPeriodDays: 7,
       },
     },
     features: cloudFeatures,
@@ -118,35 +108,6 @@ export const PRODUCTS = {
   },
   
   // One-time payment plans
-  PayOnceLifetime: {
-    name: "Note Companion - Lifetime",
-    metadata: {
-      type: "pay-once" as PlanType,
-      plan: "lifetime_license" as Plan,
-    },
-    prices: {
-      lifetime: {
-        amount: PRICES.LIFETIME,
-        type: "one_time" as const,
-        interval: "one_time" as const,
-      },
-    },
-    features: [...standardPayOnceFeatures, "Multiple Licenses with Updates Forever"],
-  },
-  PayOnceOneYear: {
-    name: "Note Companion - Lifetime",
-    metadata: {
-      type: "pay-once" as PlanType,
-      plan: "one_year_license" as Plan,
-    },
-    prices: {
-      one_year: {
-        amount: PRICES.ONE_YEAR,
-        type: "one_time" as const,
-      },
-    },
-    features: [...standardPayOnceFeatures, "One License with One Year of Updates"],
-  },
   PayOnceTopUp: {
     name: "Note Companion - Top Up",
     metadata: {

@@ -40,10 +40,10 @@ function createCustomerData(paymentIntent: Stripe.PaymentIntent): CustomerData {
     userId: paymentIntent.metadata?.userId,
     customerId: paymentIntent.customer?.toString() || "none",
     status: paymentIntent.status,
-    billingCycle: "lifetime",
+    billingCycle: "subscription",
     paymentStatus: paymentIntent.status,
-    product: "Lifetime",
-    plan: "lifetime",
+    product: "subscription",
+    plan: "monthly",
     lastPayment: new Date(),
   };
 }

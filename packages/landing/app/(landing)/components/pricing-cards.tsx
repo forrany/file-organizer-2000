@@ -30,7 +30,7 @@ export function PricingCards() {
       features: [
   
         "Seamless no-sweat setup",
-        "~1000 files per month",
+        "~1000 notes per month (5 million tokens)",
         "300 min audio transcription p/m",
         "Support",
         "30 days money-back guarantee",
@@ -39,22 +39,7 @@ export function PricingCards() {
       buttonVariant: "default" as const,
       highlight: true,
       trial: "7-day free trial",
-      discount: isYearly ? "Save ~33% with yearly billing" : "First month $9 with code ANIMUS",
-    },
-    lifetime: {
-      name: "Pay Once",
-      price: " from $200",
-      features: [
-        "Pay-as-you-go with your own API keys",
-        "Privacy-focused",
-        "Unlimited usage",
-        "Early access features",
-        "Premium support",
-        "Onboarding call with a co-founder (on request)",
-        "30 days money-back guarantee",
-      ],
-      buttonText: "Get Lifetime Access",
-      buttonVariant: "outline" as const,
+      discount: isYearly ? "Save 33% with yearly billing" : "First month $9 with code ANIMUS",
     },
   };
 
@@ -135,7 +120,7 @@ export function PricingCards() {
                   <span className="text-muted-foreground ml-1">{isYearly ? "/year" : "/month"}</span>
                 </div>
                 {isYearly ? (
-                  <p className="text-sm text-primary mt-1">Save ~33% with yearly billing</p>
+                  <p className="text-sm text-primary mt-1">Save 33% with yearly billing</p>
                 ) : (
                   <p className="text-sm text-primary mt-1">First month $9 with code ANIMUS</p>
                 )}

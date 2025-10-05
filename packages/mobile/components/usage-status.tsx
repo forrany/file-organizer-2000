@@ -87,8 +87,6 @@ export function UsageStatus({ compact = false }: UsageStatusProps) {
         return 'Monthly Subscription';
       case 'yearly':
         return 'Yearly Subscription';
-      case 'lifetime':
-        return 'Lifetime Access';
       default:
         return plan || 'Basic Plan';
     }

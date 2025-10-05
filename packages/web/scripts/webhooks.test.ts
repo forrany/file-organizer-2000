@@ -23,22 +23,6 @@ const EXPECTED_STATES = {
     billingCycle: config.products.SubscriptionYearly.metadata.type,
     maxTokenUsage: 5000 * 1000,
   },
-  lifetime: {
-    subscriptionStatus: "active",
-    paymentStatus: "paid",
-    currentProduct: config.products.PayOnceLifetime.metadata.type,
-    currentPlan: config.products.PayOnceLifetime.metadata.plan,
-    billingCycle: config.products.PayOnceLifetime.metadata.type,
-    maxTokenUsage: 0,
-  },
-  one_year: {
-    subscriptionStatus: "active",
-    paymentStatus: "paid",
-    currentProduct: config.products.PayOnceOneYear.metadata.type,
-    currentPlan: config.products.PayOnceOneYear.metadata.plan,
-    billingCycle: config.products.PayOnceOneYear.metadata.type,
-    maxTokenUsage: 0,
-  },
   top_up: {
     subscriptionStatus: "active",
     paymentStatus: "succeeded",
@@ -140,56 +124,6 @@ describe("Stripe Webhook Tests", () => {
 
     expect(userUsage).toHaveLength(1);
     expect(userUsage[0]).toMatchObject(EXPECTED_STATES.hobby_yearly);
-  });
-
-  test("Lifetime Purchase", async () => {
-    // Arrange
-    const userId = generateTestUserId("lifetime");
-    const type = config.products.PayOnceLifetime.metadata.type;
-    const plan = config.products.PayOnceLifetime.metadata.plan;
-
-    // Act
-    triggerWebhook(`stripe trigger checkout.session.completed \
-      --add checkout_session:metadata.userId=${userId} \
-      --add checkout_session:metadata.type=${type} \
-      --add checkout_session:metadata.plan=${plan} \
-      --add checkout_session:mode=payment`);
-
-    await setTimeout(1000);
-
-    // Assert
-    const userUsage = await db
-      .select()
-      .from(UserUsageTable)
-      .where(eq(UserUsageTable.userId, userId));
-
-    expect(userUsage).toHaveLength(1);
-    expect(userUsage[0]).toMatchObject(EXPECTED_STATES.lifetime);
-  });
-
-  test("OneYear Purchase", async () => {
-    // Arrange
-    const userId = generateTestUserId("one_year");
-    const type = config.products.PayOnceOneYear.metadata.type;
-    const plan = config.products.PayOnceOneYear.metadata.plan;
-
-    // Act
-    triggerWebhook(`stripe trigger checkout.session.completed \
-      --add checkout_session:metadata.userId=${userId} \
-      --add checkout_session:metadata.type=${type} \
-      --add checkout_session:metadata.plan=${plan} \
-      --add checkout_session:mode=payment`);
-
-    await setTimeout(1000);
-
-    // Assert
-    const userUsage = await db
-      .select()
-      .from(UserUsageTable)
-      .where(eq(UserUsageTable.userId, userId));
-
-    expect(userUsage).toHaveLength(1);
-    expect(userUsage[0]).toMatchObject(EXPECTED_STATES.one_year);
   });
 
   test("Failed Payment", async () => {

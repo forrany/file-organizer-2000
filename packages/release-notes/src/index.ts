@@ -132,7 +132,6 @@ export async function generateReleaseNotes(
   options: GenerateOptions
 ): Promise<ReleaseNotes> {
   const openai = createOpenAI({
-    compatibility: "strict",
     apiKey: options.openAIApiKey,
   });
 

@@ -16,8 +16,6 @@ const getUrls = () => {
     // Consistent success/cancel URLs simplify things
     success: `${origin}/dashboard?checkout=success`,
     cancel: `${origin}/dashboard/pricing?checkout=cancel`,
-    // Specific landing for lifetime might be nice, but optional
-    // lifetime: `${origin}/dashboard/lifetime`,
   };
 };
 
@@ -109,13 +107,6 @@ export async function _createStripeCheckoutSession(userId: string, plan: keyof t
 
 // --- Existing Actions Refactored ---
 
-export async function createPayOnceLifetimeCheckout() {
-  const { userId } = await auth();
-  if (!userId) throw new Error("Not authenticated");
-  const sessionUrl = await _createStripeCheckoutSession(userId, 'PayOnceLifetime');
-  redirect(sessionUrl);
-}
-
 export async function createMonthlySubscriptionCheckout() {
   const { userId } = await auth();
   if (!userId) throw new Error("Not authenticated");
@@ -136,13 +127,6 @@ export async function createYearlySession(userId: string) {
    console.warn("createYearlySession is deprecated, use server action createYearlySubscriptionCheckout");
    const sessionUrl = await _createStripeCheckoutSession(userId, 'SubscriptionYearly');
    return { url: sessionUrl }; // Maintain previous return shape if needed elsewhere, but redirect is standard
-}
-
-export async function createPayOnceOneYearCheckout() {
-  const { userId } = await auth();
-  if (!userId) throw new Error("Not authenticated");
-  const sessionUrl = await _createStripeCheckoutSession(userId, 'PayOnceOneYear');
-  redirect(sessionUrl);
 }
 
 // Add action for Top Up if needed
