@@ -24,15 +24,17 @@ jobs:
         github.event.inputs.job_to_run == 'reset-tokens' ||
         github.event.inputs.job_to_run == 'both'
       )
-      ||
-      (
-        github.event_name == 'schedule' &&
-        ( ( startsWith(needs.date.outputs.day, '01') ) )
-      )
     steps:
-      - name: Get Current Day
-        id: date
-        run: echo "day=$(date +'%d')" >> $GITHUB_OUTPUT
+      - name: Reset Tokens
+        run: |
+          curl -X GET \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            ${{ secrets.VERCEL_URL }}/api/cron/reset-tokens
+
+  reset-tokens-monthly:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'schedule' && github.event.schedule == '0 0 1 * *'
+    steps:
       - name: Reset Tokens
         run: |
           curl -X GET \
@@ -47,15 +49,17 @@ jobs:
         github.event.inputs.job_to_run == 'deploy-latest-server-version' ||
         github.event.inputs.job_to_run == 'both'
       )
-      ||
-      (
-        github.event_name == 'schedule' &&
-        ! ( startsWith(needs.date.outputs.day, '01') )
-      )
     steps:
-      - name: Get Current Day
-        id: date
-        run: echo "day=$(date +'%d')" >> $GITHUB_OUTPUT
+      - name: Deploy latest server version
+        run: |
+          curl -X GET \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            ${{ secrets.VERCEL_URL }}/api/cron/redeploy
+
+  deploy-latest-server-version-daily:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'schedule' && github.event.schedule == '0 0 * * *'
+    steps:
       - name: Deploy latest server version
         run: |
           curl -X GET \
