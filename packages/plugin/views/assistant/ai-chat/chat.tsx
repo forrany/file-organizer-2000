@@ -136,8 +136,8 @@ export const ChatComponent: React.FC<ChatComponentProps> = ({
     newUnifiedContext: contextString,
     model: plugin.settings.selectedModel, // Pass selected model to server
     enableSearchGrounding: plugin.settings.enableSearchGrounding || 
-                          selectedModel === 'gpt-5-search-preview' || 
-                          selectedModel === 'gpt-5-mini-search-preview',
+                          selectedModel === 'gpt-4o-search-preview' || 
+                          selectedModel === 'gpt-4o-mini-search-preview',
     deepSearch: plugin.settings.enableDeepSearch,
   };
 
@@ -173,7 +173,7 @@ export const ChatComponent: React.FC<ChatComponentProps> = ({
       // Handle different model types
       if (
         !plugin.settings.showLocalLLMInChat ||
-        selectedModel === "gpt-5"
+        selectedModel === "gpt-4o"
       ) {
         // Use server fetch for non-local models
         return fetch(url, options);

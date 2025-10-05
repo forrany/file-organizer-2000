@@ -181,7 +181,7 @@
           "type": "text",
           "primaryKey": false,
           "notNull": false,
-          "default": "'gpt-5'"
+          "default": "'gpt-4o'"
         },
         "vision_model_name": {
           "name": "vision_model_name",

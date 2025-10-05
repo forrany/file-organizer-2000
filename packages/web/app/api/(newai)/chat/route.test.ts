@@ -35,7 +35,7 @@ describe("Chat API Route", () => {
       method: "POST",
       body: JSON.stringify({
         messages: [{ role: "user", content: "What's the latest news about AI?" }],
-        model: "gpt-5-search-preview",
+        model: "gpt-4o-search-preview",
         enableSearchGrounding: true
       }),
       headers: {

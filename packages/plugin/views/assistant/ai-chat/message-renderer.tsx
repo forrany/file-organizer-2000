@@ -23,6 +23,9 @@ export const MessageRenderer: React.FC<MessageRendererProps> = ({
   if (message.toolInvocations) {
     return null;
   }
+  if (message.content.length === 0) {
+    return null;
+  }
 
   return (
     <motion.div

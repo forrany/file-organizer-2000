@@ -169,7 +169,7 @@
           "type": "text",
           "primaryKey": false,
           "notNull": false,
-          "default": "'gpt-5'"
+          "default": "'gpt-4o'"
         },
         "last_api_key_update": {
           "name": "last_api_key_update",
